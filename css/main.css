@@ -1,0 +1,3 @@
+body { font-family: 'Inter', sans-serif; background-color: #f8f9fa; }
+.card { transition: transform 0.2s; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+.card:hover { transform: translateY(-5px); }
