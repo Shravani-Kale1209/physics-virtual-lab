@@ -1,7 +1,7 @@
-// simulation.js
 const voltSlider = document.getElementById('volt-slider');
 const vMeter = document.getElementById('v-meter');
 const aMeter = document.getElementById('a-meter');
+const voltLabel = document.getElementById('volt-label');
 const ledBulb = document.getElementById('led-bulb');
 const ledSelector = document.getElementById('led-selector');
 const obsBody = document.getElementById('obs-body');
@@ -9,10 +9,8 @@ const addBtn = document.getElementById('add-reading');
 const clearBtn = document.getElementById('clear-data');
 
 let observations = [];
-
-// Physics Constants
 const e = 1.602e-19;
-const c = 3e8;
+const c = 2.998e8;
 
 function updateSimulation() {
     const v = parseFloat(voltSlider.value);
@@ -20,19 +18,25 @@ function updateSimulation() {
     const kneeVoltage = parseFloat(selectedOption.getAttribute('data-knee'));
     const colorCode = selectedOption.getAttribute('data-color');
 
+    // Update meter displays
     vMeter.innerText = v.toFixed(2);
+    voltLabel.innerText = v.toFixed(2);
 
-    // Physics Logic: Simplified Shockley Equation
+    // Realistic Physics Logic with Jitter
     let current = 0;
     if (v > 0) {
-        current = 0.01 * (Math.exp((v / kneeVoltage) * 5) - 1);
+        let baseCurrent = 0.01 * (Math.exp((v / kneeVoltage) * 5) - 1);
+        // Small random noise (±0.02mA)
+        let noise = (Math.random() - 0.5) * 0.04;
+        current = baseCurrent > 0.05 ? baseCurrent + noise : 0;
     }
-    current = Math.min(current, 25.0).toFixed(2);
+
+    current = Math.min(Math.max(current, 0), 25.0).toFixed(2);
     aMeter.innerText = current;
 
-    // Visual Feedback
+    // Visual Feedback: LED Glow
     if (v >= kneeVoltage) {
-        const intensity = Math.min((v - kneeVoltage) * 20, 40);
+        const intensity = Math.min((v - kneeVoltage) * 30, 60);
         ledBulb.style.backgroundColor = colorCode;
         ledBulb.style.boxShadow = `0 0 ${intensity}px ${colorCode}, 0 0 ${intensity / 2}px white`;
     } else {
@@ -48,80 +52,68 @@ function addRow() {
 
 function renderTable() {
     obsBody.innerHTML = observations.map((obs, index) => `
-        <tr>
-            <td>${index + 1}</td>
-            <td>${obs.v}</td>
-            <td>${obs.i}</td>
-        </tr>
+        <tr><td>${index + 1}</td><td>${obs.v}</td><td>${obs.i}</td></tr>
     `).join('');
 }
 
-// Function to convert 6.24e-34 to 6.24 x 10^-34
 function formatScientific(value) {
     const exp = value.toExponential(4);
     const [mantissa, exponent] = exp.split('e');
-    return `${mantissa} &times; 10<sup>${exponent}</sup> J&middot;s`;
+    // Ensure negative sign for powers of 10 is clear
+    const power = exponent.replace('+', '');
+    return `${mantissa} \\times 10^{${power}} \\text{ J·s}`;
 }
 
 function calculatePlanck() {
-    if (observations.length < 2) {
-        alert("Please record readings across the knee voltage first!");
+    if (observations.length < 3) {
+        alert("Please record at least 3-5 readings near the threshold voltage!");
         return;
     }
 
-    const selectedOption = ledSelector.options[ledSelector.selectedIndex];
-    const lambda = parseFloat(selectedOption.value) * 1e-9;
-
-    // Find the experimental knee voltage (where current first spikes)
+    const lambda = parseFloat(ledSelector.value) * 1e-9;
+    // Find experimental knee voltage (where current first exceeds 0.1mA)
     const kneeReading = observations.find(obs => parseFloat(obs.i) > 0.1);
     const v0 = kneeReading ? parseFloat(kneeReading.v) : 0;
 
     const h = (e * v0 * lambda) / c;
-
-    displayResults(v0, lambda, h);
-}
-
-function displayResults(v0, lambda, h) {
     const formattedH = formatScientific(h);
-    const resultsSection = `
-        <div class="col-12 card shadow-sm p-4 mb-5 bg-white rounded">
-            <h3 class="border-bottom pb-2">Experimental Results</h3>
+
+    document.getElementById('calculation-output').innerHTML = `
+        <hr class="my-5">
+        <div class="card shadow p-4 bg-white rounded border-primary">
+            <h3 class="text-primary border-bottom pb-2 mb-4">Final Lab Report</h3>
             <div class="row">
                 <div class="col-md-6">
-                    <h5>Formula</h5>
-                    <p class="fs-5">$$h = \\frac{e \\cdot V_0 \\cdot \\lambda}{c}$$</p>
-                    
-                    <h5>Calculations</h5>
-                    <ul>
-                        <li><b>Knee Voltage ($V_0$):</b> ${v0} V</li>
-                        <li><b>Wavelength ($\lambda$):</b> ${lambda * 1e9} nm</li>
+                    <h5>Governing Formula</h5>
+                    <p class="fs-4">$$h = \\frac{e \\cdot V_0 \\cdot \\lambda}{c}$$</p>
+                    <ul class="text-muted small">
+                        <li>$e = 1.602 \\times 10^{-19} \\text{ C}$</li>
+                        <li>$c = 2.998 \\times 10^{8} \\text{ m/s}$</li>
                     </ul>
                 </div>
                 <div class="col-md-6">
-                    <div class="alert alert-primary">
-                        <h4 class="alert-heading">Result:</h4>
-                        <p class="fs-4 mb-0"><b>$h =$</b> ${formattedH}</p>
+                    <div class="alert alert-info py-4 text-center">
+                        <h4 class="alert-heading">Calculated Value</h4>
+                        <p class="fs-2 mb-0 fw-bold">$h = ${formattedH}$</p>
                     </div>
                 </div>
             </div>
-            <div class="mt-3">
+            <div class="mt-4 p-3 bg-light rounded">
                 <h5>Conclusion:</h5>
-                <p>The experimental value of Planck's constant was determined to be <b>${formattedH}</b>. 
-                This results from the threshold voltage $V_0$ required for photon emission in a 
-                semiconductor LED of wavelength ${lambda * 1e9} nm.</p>
+                <p>Using a wavelength of <b>${(lambda * 1e9).toFixed(0)} nm</b>, the threshold voltage was observed at <b>${v0} V</b>. 
+                The experimental value of Planck's constant was found to be $h = ${formattedH}$. 
+                This result confirms the quantization of energy in light-emitting semiconductors.</p>
             </div>
         </div>
     `;
 
-    document.getElementById('calculation-output').innerHTML = resultsSection;
-
-    // Trigger MathJax to re-scan the page for new formulas
+    // Re-render MathJax
     if (window.MathJax) {
         window.MathJax.typesetPromise();
     }
 }
 
-// Listeners
+// Event Listeners
 voltSlider.addEventListener('input', updateSimulation);
 ledSelector.addEventListener('change', () => {
     voltSlider.value = 0;
@@ -134,6 +126,8 @@ addBtn.addEventListener('click', addRow);
 clearBtn.addEventListener('click', () => {
     observations = [];
     renderTable();
+    document.getElementById('calculation-output').innerHTML = "";
 });
 
+// Init
 updateSimulation();

@@ -1,11 +1,167 @@
-#led-bulb {
-    width: 50px;
-    height: 60px;
-    background: #444;
-    border-radius: 25px 25px 5px 5px;
+/* Container & Loop */
+.circuit-container {
+    position: relative;
+    width: 550px;
+    height: 320px;
+    margin: 20px auto;
 }
 
-.simulation-box {
-    min-height: 300px;
-    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+.main-wire-loop {
+    position: absolute;
+    top: 50px;
+    left: 75px;
+    width: 400px;
+    height: 200px;
+    border: 2px solid #333;
+    z-index: 1;
+}
+
+/* Component Boxes (The "Masks") */
+.comp-box {
+    position: absolute;
+    background: white;
+    /* This hides the wire behind the component */
+    z-index: 5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Precise Positioning */
+.ammeter-pos {
+    top: 120px;
+    left: 45px;
+    width: 60px;
+    height: 60px;
+}
+
+.resistor-pos {
+    top: 40px;
+    left: 200px;
+    width: 60px;
+    height: 20px;
+}
+
+.led-pos {
+    top: 30px;
+    right: 110px;
+    width: 40px;
+    height: 40px;
+}
+
+.battery-pos {
+    top: 235px;
+    left: 250px;
+    width: 50px;
+    height: 30px;
+}
+
+/* Voltmeter Branch (Parallel) */
+.voltmeter-branch {
+    position: absolute;
+    top: 52px;
+    right: 100px;
+    width: 60px;
+    z-index: 4;
+}
+
+.v-wire-l,
+.v-wire-r {
+    position: absolute;
+    width: 2px;
+    height: 60px;
+    background: #333;
+}
+
+.v-wire-l {
+    left: 0;
+}
+
+.v-wire-r {
+    right: 0;
+}
+
+.v-wire-b {
+    position: absolute;
+    width: 60px;
+    height: 2px;
+    background: #333;
+    top: 60px;
+}
+
+.v-meter-unit {
+    margin-top: 60px;
+    margin-left: -2px;
+    position: relative;
+    z-index: 10;
+    background: white;
+}
+
+/* Symbols & Icons */
+.meter-circle {
+    width: 58px;
+    height: 58px;
+    border: 2px solid #333;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.meter-circle .value {
+    color: #d63384;
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.meter-circle .label {
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+
+.resistor-symbol {
+    width: 50px;
+    height: 16px;
+    border: 2px solid #333;
+    background: repeating-linear-gradient(45deg, #ccc, #ccc 2px, #eee 2px, #eee 5px);
+}
+
+#led-bulb {
+    width: 25px;
+    height: 35px;
+    background: #555;
+    border: 2px solid #333;
+    border-radius: 12px 12px 2px 2px;
+}
+
+.battery-symbol {
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.b-line-l {
+    width: 30px;
+    height: 2px;
+    background: #333;
+    margin-bottom: 5px;
+}
+
+.b-line-s {
+    width: 15px;
+    height: 2px;
+    background: #333;
+}
+
+.v-arrow {
+    position: absolute;
+    width: 45px;
+    height: 2px;
+    background: #333;
+    transform: rotate(-45deg);
+    top: 5px;
 }
