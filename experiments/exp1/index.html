@@ -25,7 +25,7 @@
             <a href="../../index.html" class="btn btn-outline-light btn-sm fw-bold">Home Page</a>
         </div>
     </nav>
-    
+
     <div class="container mb-5">
         <div class="text-center mb-4">
             <h3 class="fw-bold text-dark mb-0">Determination of Planck's Constant</h3>
@@ -39,31 +39,53 @@
 
                     <div class="circuit-container">
                         <div class="main-wire-loop"></div>
+                    
                         <div class="comp-box ammeter-pos">
-                            <div class="meter-circle"><span class="label">mA</span><span id="a-meter"
-                                    class="value">0.00</span></div>
+                            <div class="meter-circle">
+                                <span class="label">mA</span>
+                                <span id="a-meter" class="value">0.00</span>
+                            </div>
                         </div>
+                    
                         <div class="comp-box resistor-pos">
-                            <div class="resistor-symbol"></div>
+                            <svg width="60" height="20" viewBox="0 0 60 20">
+                                <polyline points="0,10 5,10 10,2 20,18 30,2 40,18 50,2 55,10 60,10"
+                                          fill="none" stroke="#333" stroke-width="2" stroke-linejoin="round"/>
+                            </svg>
                         </div>
+                    
                         <div class="comp-box led-pos">
                             <div id="led-bulb"></div>
                         </div>
+                    
                         <div class="voltmeter-branch">
-                            <div class="v-wire-l"></div>
-                            <div class="v-wire-r"></div>
-                            <div class="v-wire-b"></div>
-                            <div class="meter-circle v-meter-unit"><span class="label">V</span><span id="v-meter"
-                                    class="value">0.00</span></div>
-                        </div>
-                        <div class="comp-box battery-pos">
-                            <div class="battery-symbol">
-                                <div class="bat-lines">
-                                    <div class="b-line-l"></div>
-                                    <div class="b-line-s"></div>
+                            <div class="v-wires">
+                                <div class="meter-circle">
+                                    <span class="label">V</span>
+                                    <span id="v-meter" class="value">0.00</span>
                                 </div>
-                                <div class="v-arrow"></div>
                             </div>
+                        </div>
+                    
+                        <div class="comp-box battery-pos">
+                            <svg width="80" height="30" viewBox="0 0 80 30">
+                                <!-- wire stubs -->
+                                <line x1="0" y1="15" x2="18" y2="15" stroke="#333" stroke-width="2"/>
+                                <line x1="62" y1="15" x2="80" y2="15" stroke="#333" stroke-width="2"/>
+                                <!-- long plate -->
+                                <line x1="18" y1="5" x2="18" y2="25" stroke="#333" stroke-width="3"/>
+                                <!-- short plate -->
+                                <line x1="26" y1="9" x2="26" y2="21" stroke="#333" stroke-width="3"/>
+                                <!-- long plate -->
+                                <line x1="36" y1="5" x2="36" y2="25" stroke="#333" stroke-width="3"/>
+                                <!-- short plate -->
+                                <line x1="44" y1="9" x2="44" y2="21" stroke="#333" stroke-width="3"/>
+                                <!-- long plate -->
+                                <line x1="54" y1="5" x2="54" y2="25" stroke="#333" stroke-width="3"/>
+                                <!-- diagonal variable arrow -->
+                                <line x1="10" y1="24" x2="70" y2="6" stroke="#333" stroke-width="1.5"/>
+                                <polygon points="70,6 63,7 67,13" fill="#333"/>
+                            </svg>
                         </div>
                     </div>
 

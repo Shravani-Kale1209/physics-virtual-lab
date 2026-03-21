@@ -1,103 +1,100 @@
 /* Container & Loop */
 .circuit-container {
     position: relative;
-    width: 550px;
-    height: 320px;
+    width: 100%;
+    height: 350px;
     margin: 20px auto;
 }
 
 .main-wire-loop {
     position: absolute;
-    top: 50px;
-    left: 75px;
-    width: 400px;
-    height: 200px;
+    top: 60px;
+    left: 80px;
+    right: 80px;
+    bottom: 60px;
     border: 2px solid #333;
-    z-index: 1;
 }
 
 /* Component Boxes (The "Masks") */
 .comp-box {
     position: absolute;
     background: white;
-    /* This hides the wire behind the component */
     z-index: 5;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-/* Precise Positioning */
+/* Ammeter: centred on left vertical wire */
 .ammeter-pos {
-    top: 120px;
-    left: 45px;
-    width: 60px;
-    height: 60px;
+    left: 50px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 62px;
+    height: 62px;
 }
 
+/* Resistor: top horizontal wire, left third */
 .resistor-pos {
-    top: 40px;
-    left: 200px;
-    width: 60px;
-    height: 20px;
+    top: 48px;
+    left: 25%;
+    background: white;
+    padding: 0 5px;
 }
 
+/* LED: top horizontal wire, right third — shifted left so voltmeter branch doesn't overlap */
 .led-pos {
-    top: 30px;
-    right: 110px;
-    width: 40px;
-    height: 40px;
+    top: 40px;
+    right: 22%;
+    background: white;
+    padding: 0 5px;
 }
 
-.battery-pos {
-    top: 235px;
-    left: 250px;
-    width: 50px;
-    height: 30px;
-}
-
-/* Voltmeter Branch (Parallel) */
+/* Voltmeter: parallel branch, hangs BELOW top wire, tapping across the LED */
 .voltmeter-branch {
     position: absolute;
-    top: 52px;
-    right: 100px;
-    width: 60px;
+    top: 60px;
+    /* flush with the top wire */
+    right: 18%;
+    /* right tap point, just after LED */
+    width: 100px;
+    /* span across LED width */
     z-index: 4;
 }
 
-.v-wire-l,
-.v-wire-r {
-    position: absolute;
-    width: 2px;
-    height: 60px;
-    background: #333;
-}
-
-.v-wire-l {
-    left: 0;
-}
-
-.v-wire-r {
-    right: 0;
-}
-
-.v-wire-b {
-    position: absolute;
-    width: 60px;
-    height: 2px;
-    background: #333;
-    top: 60px;
-}
-
-.v-meter-unit {
-    margin-top: 60px;
-    margin-left: -2px;
+/* U-shaped drop wires */
+.v-wires {
     position: relative;
-    z-index: 10;
-    background: white;
+    width: 100%;
+    height: 60px;
+    border-left: 2px solid #333;
+    border-right: 2px solid #333;
+    border-bottom: 2px solid #333;
+    box-sizing: border-box;
+    background: transparent;
 }
 
-/* Symbols & Icons */
+/* Voltmeter circle: centred at bottom of the U */
+.v-wires .meter-circle {
+    position: absolute;
+    left: 50%;
+    bottom: -29px;
+    /* half the circle height */
+    transform: translateX(-50%);
+    background: white;
+    z-index: 10;
+}
+
+/* Battery: centred on bottom wire */
+.battery-pos {
+    bottom: 45px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    padding: 0 10px;
+}
+
+/* Meter circles */
 .meter-circle {
     width: 58px;
     height: 58px;
@@ -121,47 +118,13 @@
     font-weight: bold;
 }
 
-.resistor-symbol {
-    width: 50px;
-    height: 16px;
-    border: 2px solid #333;
-    background: repeating-linear-gradient(45deg, #ccc, #ccc 2px, #eee 2px, #eee 5px);
-}
-
+/* LED bulb — original pill shape, glow is applied via JS box-shadow */
 #led-bulb {
     width: 25px;
     height: 35px;
     background: #555;
     border: 2px solid #333;
     border-radius: 12px 12px 2px 2px;
+    transition: background 0.2s, box-shadow 0.2s;
 }
 
-.battery-symbol {
-    position: relative;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.b-line-l {
-    width: 30px;
-    height: 2px;
-    background: #333;
-    margin-bottom: 5px;
-}
-
-.b-line-s {
-    width: 15px;
-    height: 2px;
-    background: #333;
-}
-
-.v-arrow {
-    position: absolute;
-    width: 45px;
-    height: 2px;
-    background: #333;
-    transform: rotate(-45deg);
-    top: 5px;
-}
