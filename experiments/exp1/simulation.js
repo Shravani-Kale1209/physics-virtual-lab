@@ -128,6 +128,66 @@ clearBtn.addEventListener('click', () => {
     renderTable();
     document.getElementById('calculation-output').innerHTML = "";
 });
+document.getElementById('download-pdf').addEventListener('click', async function () {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = doc.internal.pageSize.getWidth();
 
+    // --- 1. Header ---
+    doc.setFont("helvetica", "bold").setFontSize(18);
+    doc.text("PICT Physics Virtual Lab", pageWidth / 2, 15, { align: 'center' });
+    doc.setFontSize(12).setFont("helvetica", "normal");
+    doc.text("Determination of Planck's Constant - Lab Report", pageWidth / 2, 22, { align: 'center' });
+    doc.line(20, 25, pageWidth - 20, 25);
+
+    // --- 2. Student Info ---
+    doc.text("Name: ____________________________________", 20, 35);
+    doc.text("Roll No: __________________", 130, 35);
+    doc.text("Date: ____________________", 20, 43);
+
+    // --- 3. Circuit Diagram ---
+    doc.setFont("helvetica", "bold").text("1. Experimental Setup:", 20, 55);
+    const circuitArea = document.querySelector('.circuit-container');
+    const circuitCanvas = await html2canvas(circuitArea, { scale: 2 });
+    doc.addImage(circuitCanvas.toDataURL('image/png'), 'PNG', 40, 58, 130, 65);
+
+    // --- 4. Observations ---
+    doc.text("2. Observations:", 20, 135);
+    doc.autoTable({
+        html: '#obs-table',
+        startY: 140,
+        theme: 'grid',
+        headStyles: { fillColor: [60, 60, 60] },
+        styles: { halign: 'center' },
+        margin: { left: 20, right: 20 }
+    });
+
+    // --- 5. Blank Section for Formula & Calculations ---
+    let currentY = doc.lastAutoTable.finalY + 12;
+    doc.setFont("helvetica", "bold").text("3. Governing Formula:", 20, currentY);
+    doc.setFont("helvetica", "normal");
+    // Space for student to write the formula
+    doc.text("__________________________________________________________________________", 20, currentY + 10);
+
+    currentY += 25;
+    doc.setFont("helvetica", "bold").text("4. Calculations:", 20, currentY);
+    doc.setFont("helvetica", "normal");
+    // Multiple lines for manual calculation steps
+    doc.text("__________________________________________________________________________", 20, currentY + 10);
+    doc.text("__________________________________________________________________________", 20, currentY + 18);
+    doc.text("__________________________________________________________________________", 20, currentY + 26);
+
+    // --- 6. Final Result ---
+    currentY += 40;
+    doc.setFont("helvetica", "bold").text("5. Final Result:", 20, currentY);
+    doc.setFont("helvetica", "normal");
+    doc.text("Calculated Planck's Constant (h): ____________________ J.s", 20, currentY + 10);
+    doc.text("Standard Value of h: 6.626 x 10^-34 J.s", 20, currentY + 18);
+
+    doc.setFont("helvetica", "bold");
+    doc.text("Conclusion: ________________________________________________________", 20, currentY + 32);
+
+    doc.save("Plancks_Constant_Manual_Report.pdf");
+});
 // Init
 updateSimulation();
