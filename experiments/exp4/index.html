@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Exp 4: Laser Beam Divergence | Virtual Lab</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        /* ── Canvas — full width, tall ── */
+        .bench-canvas-wrap {
+            background: #0a0e14;
+            border-radius: 6px;
+            padding: 8px;
+            border: 1px solid #dee2e6;
+        }
+
+        #beamCanvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+
+        /* ── Live readout strip ── */
+        .readout-strip {
+            display: flex;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .readout-item {
+            flex: 1;
+            padding: 0.55rem 1rem;
+            border-right: 1px solid #dee2e6;
+            text-align: center;
+        }
+
+        .readout-item:last-child {
+            border-right: none;
+        }
+
+        .readout-label {
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #6c757d;
+        }
+
+        .readout-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #212529;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* ── Observation table — no fixed height cap, let it breathe ── */
+        #obs-table th,
+        #obs-table td {
+            font-size: 0.92rem;
+            padding: 0.55rem 1rem;
+        }
+
+        /* ── Physics ref box ── */
+        .physics-ref {
+            font-size: 0.82rem;
+            font-family: 'Courier New', monospace;
+            color: #495057;
+            line-height: 1.9;
+        }
+
+        .ref-title {
+            font-weight: 700;
+            color: #212529;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1px;
+            font-family: inherit;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-dark bg-dark shadow-sm mb-4">
+        <div class="container-fluid px-4">
+            <span class="navbar-brand mb-0 h1 fw-bold">PICT Physics Virtual Lab</span>
+            <a href="../../index.html" class="btn btn-outline-light btn-sm fw-bold">Home Page</a>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-4 mb-5">
+
+        <!-- PAGE TITLE -->
+        <div class="text-center mb-4">
+            <h3 class="fw-bold text-dark mb-0">Laser Beam Divergence</h3>
+            <p class="text-muted small">Measurement of beam spreading with distance</p>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════
+         ROW 1 — FULL-WIDTH SIMULATION
+    ══════════════════════════════════════════════════ -->
+        <div class="card shadow-sm border-0 p-3 mb-4" id="circuit-card">
+            <h5 class="text-center mb-3 border-bottom pb-2">Experimental Setup</h5>
+
+            <!-- Canvas — fills the full card width, tall intrinsic size -->
+            <div class="bench-canvas-wrap mb-3">
+                <canvas id="beamCanvas" width="1200" height="380"></canvas>
+            </div>
+
+            <!-- Live readout strip — 3 metrics across full width -->
+            <div class="readout-strip mb-3">
+                <div class="readout-item">
+                    <div class="readout-label">Distance</div>
+                    <div class="readout-value"><span id="distance-display">50</span> cm</div>
+                </div>
+                <div class="readout-item">
+                    <div class="readout-label">Beam Diameter</div>
+                    <div class="readout-value"><span id="diameter-display">—</span> mm</div>
+                </div>
+                <div class="readout-item">
+                    <div class="readout-label">Divergence θ</div>
+                    <div class="readout-value"><span id="divergence-live">—</span></div>
+                </div>
+            </div>
+
+            <!-- Controls — 4 across on wide screens -->
+            <div class="p-3 bg-light rounded border">
+                <div class="row align-items-end g-3">
+
+                    <div class="col-sm-6 col-xl-3">
+                        <div class="d-flex justify-content-between">
+                            <label class="form-label small fw-bold mb-1">Distance (cm)</label>
+                            <span class="badge bg-dark" id="dist-badge">50 cm</span>
+                        </div>
+                        <input type="range" id="distance-slider" class="form-range" min="5" max="200" value="50"
+                            oninput="document.getElementById('dist-badge').textContent=this.value+' cm'" />
+                    </div>
+
+                    <div class="col-sm-6 col-xl-3">
+                        <div class="d-flex justify-content-between">
+                            <label class="form-label small fw-bold mb-1">Beam Waist w₀ (mm)</label>
+                            <span class="badge bg-dark" id="waist-badge">0.50 mm</span>
+                        </div>
+                        <input type="range" id="waist-slider" class="form-range" min="0.1" max="2.0" step="0.05"
+                            value="0.5"
+                            oninput="document.getElementById('waist-badge').textContent=parseFloat(this.value).toFixed(2)+' mm'" />
+                    </div>
+
+                    <div class="col-sm-6 col-xl-3">
+                        <div class="d-flex justify-content-between">
+                            <label class="form-label small fw-bold mb-1">Divergence Factor</label>
+                            <span class="badge bg-dark" id="theta-badge">0.02</span>
+                        </div>
+                        <input type="range" id="theta-slider" class="form-range" min="0.01" max="0.10" step="0.01"
+                            value="0.02"
+                            oninput="document.getElementById('theta-badge').textContent=parseFloat(this.value).toFixed(2)" />
+                    </div>
+
+                    <div class="col-sm-6 col-xl-3">
+                        <label class="form-label small fw-bold mb-1">Select Laser Wavelength</label>
+                        <select id="lambda-select" class="form-select">
+                            <option value="405">Violet — 405 nm</option>
+                            <option value="450">Blue — 450 nm</option>
+                            <option value="532">Green — 532 nm</option>
+                            <option value="633" selected>Red — 633 nm (He-Ne)</option>
+                            <option value="780">Near IR — 780 nm</option>
+                        </select>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════
+         ROW 2 — OBSERVATIONS  +  PHYSICS REF
+    ══════════════════════════════════════════════════ -->
+        <div class="row g-4 align-items-start">
+
+            <!-- Observation table — wider, no fixed height cap -->
+            <div class="col-lg-5">
+                <div class="card shadow-sm border-0 p-3">
+                    <h5 class="fw-bold mb-3 text-center border-bottom pb-2">Observations</h5>
+
+                    <div class="table-responsive">
+                        <table id="obs-table" class="table table-hover text-center align-middle mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th style="width:60px">#</th>
+                                    <th>Distance (cm)</th>
+                                    <th>Beam Diameter (mm)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="obs-body">
+                                <!-- rows injected by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- empty state hint -->
+                    <p id="empty-hint" class="text-center text-muted small mt-3 mb-0">
+                        No readings recorded yet. Adjust sliders and click <strong>Record Reading</strong>.
+                    </p>
+
+                    <!-- Action buttons -->
+                    <div class="d-grid gap-2 mt-3">
+                        <button id="add-reading" class="btn btn-primary fw-bold">Record Reading</button>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <button id="clear-data" class="btn btn-outline-danger btn-sm w-100">Clear Table</button>
+                            </div>
+                            <div class="col-6">
+                                <button id="download-pdf"
+                                    class="btn btn-danger btn-sm w-100 text-white fw-bold">Download PDF</button>
+                            </div>
+                        </div>
+                        <button onclick="calculateDivergence()" class="btn btn-success btn-lg mt-1 fw-bold">
+                            Calculate Divergence
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Physics reference — right column -->
+            <div class="col-lg-7">
+                <div class="card shadow-sm border-0 p-3">
+                    <h5 class="fw-bold mb-3 text-center border-bottom pb-2">Physics Reference</h5>
+
+                    <div class="bg-white p-3 rounded border mb-3">
+                        <div class="ref-title">Gaussian Beam</div>
+                        <div class="physics-ref">
+                            w(z) = w₀ · √(1 + (z/z<sub>R</sub>)²)<br />
+                            z<sub>R</sub> = π·w₀²/λ &nbsp;(Rayleigh range)
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-3 rounded border mb-3">
+                        <div class="ref-title">Divergence Half-Angle</div>
+                        <div class="physics-ref">
+                            θ = (D₂ − D₁) / (2·L)<br />
+                            Linear approx: D(x) = D₀ + θ·x
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-3 rounded border">
+                        <div class="ref-title">Constants</div>
+                        <div class="physics-ref">
+                            c = 2.998 × 10⁸ m/s<br />
+                            h = 6.626 × 10⁻³⁴ J·s<br />
+                            1 mrad = 10⁻³ rad
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- RESULT -->
+        <div id="result" class="mt-4 pb-5"></div>
+
+    </div>
+
+    <script src="simulation.js"></script>
+</body>
+
+</html>
