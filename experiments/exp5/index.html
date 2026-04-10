@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experiment 2: Hall Effect | PICT Quantum Physics Virtual Lab</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <script>
+        window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <style>
+        body { background-color: #f4f4f4; }
+        .meter-circle {
+            width: 90px; height: 90px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 3px solid #212529;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            font-weight: bold; margin: 0 auto;
+            box-shadow: inset 0px 0px 5px rgba(0,0,0,0.1);
+        }
+        .meter-circle .label { font-size: 0.75rem; color: #495057; text-transform: uppercase; }
+        .meter-circle .value { font-size: 1.2rem; color: #212529; }
+        .circuit-container {
+            background: #ffffff;
+            border: 1px solid #ced4da;
+            padding: 20px;
+            text-align: center;
+            border-radius: 4px;
+        }
+        canvas {
+            background-color: #ffffff;
+            border: 1px solid #dee2e6;
+            max-width: 100%;
+        }
+        /* Formal table styling overrides */
+        .table-dark th { background-color: #212529; color: #ffffff; border-color: #495057; }
+        .btn-formal { border-radius: 0; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.85rem; padding: 12px; }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-dark bg-dark shadow-sm mb-4"> 
+        <div class="container">
+            <span class="navbar-brand mb-0 h1 fw-bold">PICT Quantum Physics Virtual Lab</span>
+            <a href="../../index.html" class="btn btn-outline-light btn-sm fw-bold btn-formal" style="padding: 6px 12px;">Home Page</a>
+        </div>
+    </nav>
+
+    <div class="container mb-5">
+        <div class="text-center mb-4">
+            <h3 class="fw-bold text-dark mb-0">Measurement of the Hall Effect</h3>
+            <p class="text-muted">Determining Charge Carrier Concentration in n-type Germanium</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <div class="card border-dark rounded-0 p-3 shadow-sm" id="circuit-card">
+                    <h5 class="text-center mb-3 text-uppercase border-bottom pb-2">Experimental Setup</h5>
+
+                    <div class="circuit-container d-flex justify-content-around align-items-center mb-4">
+                        
+                        <div class="meter-box">
+                            <div class="meter-circle">
+                                <span class="label">Tesla</span>
+                                <span id="b-meter" class="value">0.00</span>
+                            </div>
+                        </div>
+
+                        <div class="comp-box mx-3">
+                            <canvas id="hall-canvas" width="350" height="180"></canvas>
+                        </div>
+                    
+                        <div class="meter-box">
+                            <div class="meter-circle">
+                                <span class="label">Millivolts</span>
+                                <span id="v-meter" class="value">0.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-white border border-secondary rounded-0">
+                        <div class="row align-items-center mb-4">
+                            <div class="col-md-12">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <label class="form-label small fw-bold text-uppercase">Adjust Probe Current</label>
+                                    <span class="badge bg-dark rounded-0" id="current-label">0.0 Milliamperes</span>
+                                </div>
+                                <input type="range" id="current-slider" class="form-range" min="0" max="20" step="0.5" value="0">
+                            </div>
+                        </div>
+                        <div class="row align-items-center">
+                            <div class="col-md-12">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <label class="form-label small fw-bold text-uppercase">Adjust Magnetic Field</label>
+                                    <span class="badge bg-dark rounded-0" id="magnetic-label">0.00 Tesla</span>
+                                </div>
+                                <input type="range" id="magnetic-slider" class="form-range" min="0" max="1.0" step="0.05" value="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="card border-dark rounded-0 h-100 p-3 shadow-sm">
+                    <h5 class="fw-bold mb-3 text-center text-uppercase border-bottom pb-2">Observations</h5>
+                    <div class="table-responsive" style="height: 250px;">
+                        <table id="obs-table" class="table table-sm table-bordered table-hover text-center align-middle">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Index</th>
+                                    <th>Current (Milliamperes)</th>
+                                    <th>Field (Tesla)</th>
+                                    <th>Hall Voltage (Millivolts)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="obs-body"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex flex-column gap-2 mt-3">
+                        <button id="add-reading" class="btn btn-dark btn-formal fw-bold w-100 border border-dark">Record Observation</button>
+                        <button onclick="calculateHallEffect()" class="btn btn-outline-dark btn-formal fw-bold w-100 border-2">Calculate Hall Coefficient</button>
+                        <button id="download-pdf" class="btn btn-secondary btn-formal fw-bold w-100 text-white border border-secondary">Export Portable Document Format</button>
+                        <button id="clear-data" class="btn btn-outline-secondary btn-formal fw-bold w-100">Clear Table</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12 text-center">
+                <div class="bg-white p-4 border border-dark rounded-0 shadow-sm d-inline-block">
+                    <h6 class="text-uppercase fw-bold mb-3 border-bottom pb-2">The Hall Effect Equations</h6>
+                    <span class="fs-4">$$V_H = \frac{I \cdot B}{n \cdot e \cdot t} \quad \text{and} \quad R_H = \frac{V_H \cdot t}{I \cdot B}$$</span>
+                    <small class="text-muted d-block mt-3">Where $R_H$ is the Hall Coefficient, $n$ is charge carrier concentration, and $t$ is thickness.</small>
+                </div>
+            </div>
+        </div>
+        <div id="calculation-output" class="mt-4 pb-5"></div>
+    </div>
+
+    <script src="simulation.js"></script>
+</body>
+
+</html>
