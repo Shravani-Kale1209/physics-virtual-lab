@@ -1,0 +1,338 @@
+/*
+ * ============================================================
+ *  VLabs Theme — Bootstrap Color Override
+ *  Applies vlabs.ac.in color palette to all experiments.
+ *  Does NOT change layout, structure, or element positions.
+ * ============================================================
+ *
+ *  Primary blue  : #1a7fbf
+ *  Dark navy     : #0d3b6e
+ *  Accent teal   : #17848a
+ *  Light bg      : #f0f5fa
+ *  Success green : #217d4b
+ *  Danger red    : #c0392b
+ *  Text dark     : #1e2a35
+ * ============================================================
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* ── Base ───────────────────────────────────────────────── */
+body {
+    font-family: 'Inter', Arial, Helvetica, sans-serif !important;
+    background-color: #f0f5fa !important;
+    color: #1e2a35 !important;
+}
+
+/* ── Navbar: bg-dark → VLabs blue ───────────────────────── */
+.navbar.bg-dark,
+nav.navbar.bg-dark {
+    background-color: #0d3b6e !important;
+    border-bottom: 3px solid #1a7fbf !important;
+}
+
+/* Navbar brand text */
+.navbar-brand {
+    color: #ffffff !important;
+    letter-spacing: 0.3px;
+}
+
+/* Home Page button in navbar */
+.navbar .btn-outline-light {
+    border-color: rgba(255,255,255,0.55) !important;
+    color: rgba(255,255,255,0.9) !important;
+}
+.navbar .btn-outline-light:hover {
+    background-color: rgba(255,255,255,0.15) !important;
+    color: #fff !important;
+}
+
+/* ── Page title area ─────────────────────────────────────── */
+.text-center > h3.fw-bold.text-dark,
+.text-center > h1.fw-bold.text-dark {
+    color: #0d3b6e !important;
+}
+
+/* ── Cards ───────────────────────────────────────────────── */
+.card {
+    border: 1px solid #d0dff0 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 3px 14px rgba(13, 59, 110, 0.08) !important;
+    background: #ffffff !important;
+}
+
+/* Card inner section headers & dividers */
+.card h5,
+.card h6 {
+    color: #0d3b6e !important;
+}
+
+.card .border-bottom {
+    border-bottom-color: #c8d9ee !important;
+}
+
+/* ── Slider controls bg ──────────────────────────────────── */
+.bg-light.rounded.border,
+.slider-container {
+    background-color: #eaf2fb !important;
+    border-color: #c2d8ef !important;
+}
+
+/* ── Bootstrap Badges ────────────────────────────────────── */
+.badge.bg-dark {
+    background-color: #0d3b6e !important;
+}
+
+.badge.bg-primary {
+    background-color: #1a7fbf !important;
+}
+
+.badge.bg-danger {
+    background-color: #c0392b !important;
+}
+
+.badge.bg-secondary {
+    background-color: #4a7a9b !important;
+}
+
+.text-bg-danger {
+    background-color: #c0392b !important;
+    color: #fff !important;
+}
+
+.text-bg-secondary {
+    background-color: #4a7a9b !important;
+    color: #fff !important;
+}
+
+/* ── Buttons ─────────────────────────────────────────────── */
+
+/* Primary (Record Reading) → VLabs blue */
+.btn-primary {
+    background-color: #1a7fbf !important;
+    border-color: #1a7fbf !important;
+    color: #fff !important;
+}
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: #1570a8 !important;
+    border-color: #1570a8 !important;
+    box-shadow: 0 4px 14px rgba(26, 127, 191, 0.35) !important;
+}
+
+/* Success (Calculate / Verify) → VLabs green */
+.btn-success {
+    background-color: #217d4b !important;
+    border-color: #217d4b !important;
+    color: #fff !important;
+}
+.btn-success:hover,
+.btn-success:focus {
+    background-color: #1a6840 !important;
+    border-color: #1a6840 !important;
+}
+
+/* Danger (Download PDF) */
+.btn-danger {
+    background-color: #c0392b !important;
+    border-color: #c0392b !important;
+    color: #fff !important;
+}
+.btn-danger:hover,
+.btn-danger:focus {
+    background-color: #a93226 !important;
+    border-color: #a93226 !important;
+}
+
+/* Outline-danger (Clear Table) */
+.btn-outline-danger {
+    color: #c0392b !important;
+    border-color: #c0392b !important;
+}
+.btn-outline-danger:hover {
+    background-color: #c0392b !important;
+    color: #fff !important;
+}
+
+/* Outline-secondary */
+.btn-outline-secondary {
+    color: #4a7a9b !important;
+    border-color: #4a7a9b !important;
+}
+.btn-outline-secondary:hover {
+    background-color: #4a7a9b !important;
+    color: #fff !important;
+}
+
+/* Calc buttons specific (btn-calc / btn-record) — exp3 */
+.btn-record  { background-color: #1a7fbf !important; border-color: #1a7fbf !important; }
+.btn-record:hover  { background-color: #1570a8 !important; }
+.btn-calc    { background-color: #217d4b !important; border-color: #217d4b !important; }
+.btn-calc:hover    { background-color: #1a6840 !important; }
+.btn-pdf     { background-color: #c0392b !important; border-color: #c0392b !important; }
+.btn-pdf:hover     { background-color: #a93226 !important; }
+.btn-clear   { color: #4a7a9b !important; border-color: #4a7a9b !important; }
+.btn-clear:hover   { background-color: #f0f5fa !important; }
+
+/* ── Table headers ───────────────────────────────────────── */
+
+/* table-dark thead */
+.table-dark,
+thead.table-dark,
+.table > thead.table-dark,
+.table-dark > thead {
+    background-color: #0d3b6e !important;
+    color: #ffffff !important;
+}
+
+.table-dark th {
+    background-color: #0d3b6e !important;
+    color: #ffffff !important;
+    border-color: #1a5490 !important;
+}
+
+/* table-light thead (exp2) */
+.table-light,
+thead.table-light th {
+    background-color: #ddeaf7 !important;
+    color: #0d3b6e !important;
+    border-color: #c2d8ef !important;
+}
+
+/* Table hover */
+.table-hover tbody tr:hover > * {
+    background-color: #eaf2fb !important;
+    color: #1e2a35 !important;
+}
+
+/* ── Form range sliders ───────────────────────────────────── */
+.form-range::-webkit-slider-thumb {
+    background-color: #1a7fbf !important;
+    border: 2px solid #fff !important;
+    box-shadow: 0 0 0 3px rgba(26, 127, 191, 0.2) !important;
+}
+.form-range::-moz-range-thumb {
+    background-color: #1a7fbf !important;
+    border: 2px solid #fff !important;
+}
+.form-range::-webkit-slider-runnable-track {
+    background: linear-gradient(to right, #1a7fbf, #8ec5e3) !important;
+    border-radius: 3px;
+}
+
+/* ── Form select ─────────────────────────────────────────── */
+.form-select:focus {
+    border-color: #1a7fbf !important;
+    box-shadow: 0 0 0 0.2rem rgba(26, 127, 191, 0.25) !important;
+}
+
+/* ── Text colors ─────────────────────────────────────────── */
+.text-primary {
+    color: #1a7fbf !important;
+}
+
+.text-muted {
+    color: #5a7a96 !important;
+}
+
+/* Labels in slider-container */
+.fw-bold.text-primary {
+    color: #1a7fbf !important;
+}
+
+/* ── Alert (uncertainty product display, exp2) ───────────── */
+.alert.bg-light.border {
+    background-color: #eaf2fb !important;
+    border-color: #9ec8e8 !important;
+}
+
+/* ── Formula box (bg-white border) ──────────────────────── */
+.bg-white.p-3.rounded.shadow-sm.border.d-inline-block {
+    border-color: #c2d8ef !important;
+    box-shadow: 0 3px 12px rgba(13, 59, 110, 0.1) !important;
+}
+
+/* ── Exp3 specific overrides ─────────────────────────────── */
+
+/* navbar override for exp3 .navbar without bg-dark */
+.navbar:not(.navbar-light) {
+    background-color: #0d3b6e !important;
+}
+
+/* exp3 formula box dark */
+.formula-box {
+    background: linear-gradient(135deg, #0d3b6e 0%, #0a2a50 100%) !important;
+}
+
+/* exp3 resistance panel */
+.resistance-panel {
+    background: #0d1f35 !important;
+}
+
+/* exp3 result hero */
+.result-hero {
+    background: linear-gradient(135deg, #1a3d6e, #0d1f35) !important;
+}
+
+/* exp3 table-dark sticky header */
+#obs-table thead th {
+    background-color: #0d3b6e !important;
+    color: #fff !important;
+}
+
+/* ── Exp3 card-title color ───────────────────────────────── */
+.card-title {
+    color: #0d3b6e !important;
+}
+
+/* ── Chart.js theme nudge (canvas borders) ───────────────── */
+canvas {
+    border-radius: 8px;
+}
+
+/* ── Meter circles (exp1 circuit) ────────────────────────── */
+.meter-circle {
+    border-color: #1a7fbf !important;
+}
+
+.meter-circle .label {
+    color: #0d3b6e !important;
+}
+
+.meter-circle .value {
+    color: #c0392b !important;
+}
+
+/* Wire loop border */
+.main-wire-loop {
+    border-color: #1a7fbf !important;
+}
+
+/* ── Exp4 readout strip ──────────────────────────────────── */
+.readout-strip {
+    border-color: #c2d8ef !important;
+    background: #f7fafd !important;
+}
+
+.readout-item {
+    border-right-color: #c2d8ef !important;
+}
+
+.readout-value {
+    color: #0d3b6e !important;
+}
+
+.readout-label {
+    color: #5a7a96 !important;
+}
+
+/* ── Scrollbar (webkit) ──────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #eaf2fb; border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: #9ec8e8; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #1a7fbf; }
+
+/* ── Smooth transitions on interactive elements ──────────── */
+.btn, .card, .badge, input[type="range"] {
+    transition: all 0.18s ease !important;
+}
