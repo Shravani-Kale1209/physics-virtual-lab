@@ -2,166 +2,390 @@
 <html lang="en">
 
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Exp: Heisenberg Uncertainty Principle</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exp: Heisenberg Uncertainty Principle</title>
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }
+        };
+    </script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
-<script>
-window.MathJax = {
-  tex: {
-    inlineMath: [['$', '$'], ['\\(', '\\)']],
-    displayMath: [['$$', '$$'], ['\\[', '\\]']]
-  }
-};
-</script>
-<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+        }
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+        /* ── Canvas Wrap matching exp4 ── */
+        .bench-canvas-wrap {
+            background: #0a0e14;
+            border-radius: 6px;
+            padding: 15px;
+            border: 1px solid #dee2e6;
+            margin-bottom: 20px;
+        }
 
-<style>
-    body {
-        background-color: #f4f6f9;
-        color: #333;
-    }
-    .card {
-        border: none;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
-    .chart-container {
-        position: relative;
-        height: 240px; 
-        width: 100%;
-    }
-    .slider-container {
-        background: #fff;
-        padding: 12px 15px;
-        border-radius: 8px;
-        border: 1px solid #eaeaea;
-    }
-    .math-text {
-        font-family: 'Times New Roman', Times, serif;
-        font-size: 1.05rem;
-    }
-    .table-container {
-        min-height: 280px; 
-    }
-    .navbar-brand {
-        letter-spacing: 0.5px;
-    }
-</style>
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #00ff41;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .status-led {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: #00ff41;
+            box-shadow: 0 0 6px #00ff41;
+        }
+
+        /* Canvas Headers in Dark Wrap */
+        .canvas-title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .canvas-title .span:first-child { color: black; }
+        .canvas-title .purple-text { color: #d05ce3; }
+        .canvas-title .blue-text { color: #5c9ce3; }
+
+        .ft-arrow-container {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            min-height: 100px;
+        }
+
+        .ft-text {
+            color: #a872e8;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .ft-arrow {
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, #4b3687, #a872e8);
+            position: relative;
+        }
+        .ft-arrow::after {
+            content: '';
+            position: absolute;
+            right: -8px; top: -6px;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            border-left: 10px solid #a872e8;
+        }
+
+        /* ── Live readout strip matching exp4 ── */
+        .readout-strip {
+            display: flex;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #fff;
+            margin-bottom: 20px;
+        }
+
+        .readout-item {
+            flex: 1;
+            padding: 0.55rem 1rem;
+            border-right: 1px solid #dee2e6;
+            text-align: center;
+        }
+
+        .readout-item:last-child {
+            border-right: none;
+        }
+
+        .readout-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #6c757d;
+            font-weight: bold;
+        }
+
+        .readout-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+        }
+
+        .val-purple { color: #d05ce3; }
+        .val-blue { color: #5ca4e3; }
+        .val-yellow { color: #e3bc5c; }
+        .val-green { color: #28a745; }
+
+        /* Tables & Graph Wrap */
+        .graph-wrap {
+            background: #0a0e14;
+            border-radius: 6px;
+            padding: 15px;
+            border: 1px solid #dee2e6;
+        }
+
+        #obs-table th,
+        #obs-table td {
+            font-size: 0.95rem;
+            padding: 0.55rem 1rem;
+            vertical-align: middle;
+        }
+
+        .canvas-title span:first-child { color: white; }
+        .canvas-title .purple-text { color: #d05ce3; }
+        .canvas-title .blue-text { color: #5c9ce3; }
+
+        .ft-arrow-container {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+
+        .ft-text {
+            color: #a872e8;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .ft-arrow {
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, #4b3687, #a872e8);
+            position: relative;
+        }
+        .ft-arrow::after {
+            content: '';
+            position: absolute;
+            right: -8px; top: -6px;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            border-left: 10px solid #a872e8;
+        }
+
+        /* Readout Boxes */
+        .readout-box {
+            background: #0a0e17;
+            border: 1px solid #1f2937;
+            border-radius: 8px;
+            padding: 15px 10px;
+            text-align: center;
+            height: 100%;
+        }
+        
+        .r-title { font-size: 0.8rem; color: #9ca3af; margin-bottom: 5px; }
+        .r-val { font-size: 1.3rem; font-weight: bold; }
+        
+        .val-purple { color: #d05ce3; }
+        .val-blue { color: #5ca4e3; }
+        .val-yellow { color: #e3bc5c; }
+        .val-green { color: #5ce375; }
+
+        /* Sliders */
+        .control-panel {
+            background: #0a0f1a;
+            border: 1px solid #1f2a40;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .form-range::-webkit-slider-thumb { background: #5ca4e3; }
+
+        /* Tables & Bottom Area */
+        .table-dark-custom {
+            background-color: #0b1120;
+            color: #a0b2d6;
+            border: 1px solid #1a233a;
+        }
+        .table-dark-custom th {
+            background-color: #111a2f;
+            border-bottom: 1px solid #1a233a;
+            color: #a0b2d6;
+            font-weight: normal;
+        }
+        .table-dark-custom td {
+            border-color: #1a233a;
+            vertical-align: middle;
+        }
+        .result-pass { color: #5ce375; font-weight: bold; }
+        .result-fail { color: #e35c5c; font-weight: bold; }
+
+    </style>
+    <link rel="stylesheet" href="../../css/vlabs-theme.css">
 </head>
 
-<body>
+<body class="bg-light">
 
-<nav class="navbar navbar-dark bg-dark shadow-sm mb-4">
-    <div class="container">
-        <span class="navbar-brand mb-0 h1 fw-bold">PICT Quantum Physics Virtual Lab</span>
-        <a href="../../index.html" class="btn btn-outline-light btn-sm fw-bold">Home Page</a>
-    </div>
-</nav>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-dark bg-dark shadow-sm mb-4">
+        <div class="container-fluid px-4">
+            <span class="navbar-brand mb-0 h1 fw-bold text-white">PICT Quantum Physics Virtual Lab</span>
+            <a href="../../index.html" class="btn btn-outline-light btn-sm fw-bold">Home Page</a>
+        </div>
+    </nav>
 
-<div class="container mb-5">
+    <div class="container-fluid px-4 mb-5">
 
-    <div class="text-center mb-4">
-        <h3 class="fw-bold text-dark mb-0">Heisenberg Uncertainty Principle</h3>
-        <p class="text-muted small">Engineering Physics Simulation Workspace</p>
-    </div>
-
-    <div class="row g-4">
-
-        <div class="col-lg-6">
-            <div class="card p-3 h-100">
-                
-                <div class="slider-container mb-2">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <label class="fw-bold text-primary mb-0 small">Position Uncertainty ($\Delta x$)</label>
-                        <span class="badge bg-primary px-2 py-1"><span id="x-meter">10.0</span> pm</span>
-                    </div>
-                    <input type="range" id="x-slider" class="form-range" min="1" max="100" step="1" value="10">
-                </div>
-
-                <div class="slider-container mb-3">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <label class="fw-bold text-danger mb-0 small">Momentum Uncertainty ($\Delta p$)</label>
-                        <span class="badge bg-danger px-2 py-1"><span id="p-meter">2.0</span></span>
-                    </div>
-                    <input type="range" id="p-slider" class="form-range" min="0.1" max="15" step="0.1" value="2.0">
-                    <div class="text-muted" style="font-size: 0.75rem; text-align: right;">Scale: $\times 10^{-24}$ kg·m/s</div>
-                </div>
-
-                <div class="alert bg-light border text-center py-2 mb-3">
-                    <div class="fs-5 fw-bold math-text" id="product-display">
-                        Product: <span id="product-val">2.00 &times; 10<sup>-35</sup></span> J·s
-                    </div>
-                    <div id="warning-text" class="text-danger small fw-bold mt-1" style="display: none;">
-                        ⚠️ Below theoretical minimum limit ($5.27 \times 10^{-35}$ J·s)!
-                    </div>
-                </div>
-
-                <div class="chart-container mt-auto">
-                    <canvas id="waveChart"></canvas>
-                </div>
-            </div>
+        <!-- PAGE TITLE -->
+        <div class="text-center mb-4">
+            <h3 class="fw-bold text-dark mb-0">Heisenberg Uncertainty Principle</h3>
+            <p class="text-muted small">Experimental validation via wave packet Fourier transform</p>
         </div>
 
-        <div class="col-lg-6">
-            <div class="card p-3 h-100 d-flex flex-column">
-                <h6 class="fw-bold mb-2 text-center border-bottom pb-2">Recorded Observations (Max 8)</h6>
+        <!-- MAIN SIMULATION CARD -->
+        <div class="card shadow-sm border-0 p-3 mb-4">
+            <h5 class="text-center mb-3 border-bottom pb-2">Quantum State Simulation</h5>
 
-                <div class="table-responsive table-container mb-3">
-                    <table class="table table-hover table-sm text-center align-middle" style="font-size: 0.85rem;">
-                        <thead class="table-light">
-                            <tr>
-                                <th>#</th>
-                                <th>$\Delta x$ (m)</th>
-                                <th>$\Delta p$ (kg·m/s)</th>
-                                <th>$\Delta x \Delta p$ (J·s)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="obs-body" class="math-text"></tbody>
-                    </table>
+            <!-- Dark Canvas Setup -->
+            <div class="bench-canvas-wrap">
+                <div class="status-badge">
+                    <div class="status-led"></div>
+                    Experiment Running
                 </div>
 
-                <div class="mt-auto row g-2">
-                    <div class="col-12">
-                        <button id="add-reading" class="btn btn-primary w-100 py-2 fw-bold shadow-sm">Record Reading</button>
+                <!-- Wave Canvases -->
+                <div class="row align-items-center mb-2">
+                    <div class="col-lg-5">
+                        <div class="canvas-title">
+                            <span>Real Space: Wave Packet</span> <span class="purple-text">ψ(x)</span>
+                        </div>
+                        <div class="d-flex justify-content-center">
+                            <canvas id="realCanvas" width="450" height="250" style="width: 100%; max-width: 450px; background: #06090e; border-radius: 4px;"></canvas>
+                        </div>
                     </div>
-                    <div class="col-6">
-                        <button onclick="calculateUncertainty()" class="btn btn-success w-100 py-2 fw-bold shadow-sm">Verify Data</button>
+
+                    <div class="col-lg-2">
+                        <div class="ft-arrow-container">
+                            <div class="ft-text">Fourier</div>
+                            <div class="ft-arrow"></div>
+                            <div class="ft-text mt-1">Transform</div>
+                        </div>
                     </div>
-                    <div class="col-6">
-                        <button id="download-pdf" class="btn btn-danger w-100 py-2 text-white fw-bold shadow-sm">Download PDF Report</button>
-                    </div>
-                    <div class="col-12">
-                        <button id="clear-data" class="btn btn-outline-secondary w-100 py-1 btn-sm">Clear Table</button>
+
+                    <div class="col-lg-5">
+                        <div class="canvas-title">
+                            <span>Momentum Space:</span> <span class="blue-text">Φ(p)</span>
+                        </div>
+                        <div class="d-flex justify-content-center">
+                            <canvas id="momCanvas" width="450" height="250" style="width: 100%; max-width: 450px; background: #06090e; border-radius: 4px;"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-    </div>
-
-    <div class="row mt-4">
-        <div class="col-12 text-center">
-            <div class="bg-white p-3 rounded shadow-sm border d-inline-block">
-                <h6 class="text-muted mb-2">The Heisenberg Uncertainty Principle</h6>
-                <span class="fs-4">$$ \Delta x \cdot \Delta p \ge \frac{\hbar}{2} $$</span>
-                <small class="text-muted d-block mt-2">Where $\hbar \approx 1.054 \times 10^{-34}$ J·s</small>
+            <!-- Light Theme Readout Strip -->
+            <div class="readout-strip">
+                <div class="readout-item">
+                    <div class="readout-label">Position Uncertainty (Δx)</div>
+                    <div class="readout-value val-purple"><span id="val-dx">0.00</span> nm</div>
+                </div>
+                <div class="readout-item">
+                    <div class="readout-label">Momentum Uncertainty (Δp)</div>
+                    <div class="readout-value val-blue"><span id="val-dp">0.00</span> <span style="font-size:0.8rem">kg·m/s</span></div>
+                </div>
+                <div class="readout-item">
+                    <div class="readout-label">Product (Δx · Δp)</div>
+                    <div class="readout-value val-yellow"><span id="val-prod">0.00</span> <span style="font-size:0.8rem">J·s</span></div>
+                </div>
+                <div class="readout-item bg-light">
+                    <div class="readout-label text-success">Theoretical Limit ℏ/2</div>
+                    <div class="readout-value val-green">5.27 × 10⁻³⁵ <span style="font-size:0.8rem">J·s</span></div>
+                </div>
             </div>
+
+            <!-- Control Panel -->
+            <div class="p-3 bg-light rounded border">
+                <div class="row align-items-center">
+                    <div class="col-lg-2 text-center text-lg-end">
+                        <label class="fw-bold text-dark">Initial Packet Width (Δx):</label>
+                    </div>
+                    <div class="col-lg-8 py-2">
+                        <input type="range" id="x-slider" class="form-range" min="0.1" max="10" step="0.1" value="0.5">
+                        <div class="d-flex justify-content-between text-muted small mt-1">
+                            <span>Highly Localized (0.1 nm)</span>
+                            <span>Highly Delocalized (10.0 nm)</span>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 text-center text-lg-start">
+                        <button id="add-reading" class="btn btn-primary px-4 fw-bold shadow-sm w-100">
+                            Record Frame
+                        </button>
+                    </div>
+                </div>
+            </div>
+
         </div>
+
+        <!-- BOTTOM AREA: Graph & Table -->
+        <div class="row g-4 align-items-stretch">
+            
+            <div class="col-lg-5">
+                <div class="card shadow-sm border-0 p-3 h-100 d-flex flex-column">
+                    <h5 class="text-center border-bottom pb-2 mb-3 fw-bold">Uncertainty Product Graph</h5>
+                    
+                    <div class="graph-wrap flex-grow-1 d-flex flex-column justify-content-center align-items-center">
+                        <h6 class="text-light mb-2">Uncertainty Product vs Initial Width (Δx)</h6>
+                        <canvas id="productGraphCanvas" width="400" height="280" style="width:100%; border-radius: 4px;"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="card shadow-sm border-0 p-3 h-100 d-flex flex-column">
+                    <h5 class="text-center border-bottom pb-2 mb-3 fw-bold">Observation Table</h5>
+                    
+                    <div class="table-responsive flex-grow-1">
+                        <table class="table table-hover text-center align-middle mb-0" id="obs-table">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Sl.<br>No.</th>
+                                    <th>Δx (nm)</th>
+                                    <th>Δp (kg·m/s)</th>
+                                    <th>Δx · Δp (J·s)</th>
+                                    <th>ℏ / 2 (J·s)</th>
+                                    <th>Result</th>
+                                </tr>
+                            </thead>
+                            <tbody id="obs-body"></tbody>
+                        </table>
+                    </div>
+                    
+                    <p id="empty-hint" class="text-center text-muted small mt-3 mb-0" style="display:none;">
+                        No readings recorded yet. Adjust slider and click <strong>Record Frame</strong>.
+                    </p>
+
+                    <div class="d-flex justify-content-end gap-2 mt-3 pt-3 border-top">
+                        <button id="clear-data" class="btn btn-outline-danger btn-sm px-4">Clear Table</button>
+                        <button id="download-pdf" class="btn btn-danger btn-sm px-4 fw-bold">Download PDF Report</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
     </div>
 
-    <div id="calculation-output" class="mt-3"></div>
-
-</div>
-
-<script src="simulation.js"></script>
+    <script src="simulation.js"></script>
 
 </body>
 </html>

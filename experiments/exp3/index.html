@@ -16,140 +16,387 @@
     </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
-    <link rel="stylesheet" href="../../css/experiment.css">
-
     <style>
-        body { background-color: #f4f6f9; color: #333; }
-        .card { border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
 
-        /* Semiconductor device drawing */
-        .device-container {
-            position: relative;
-            width: 100%;
-            height: 320px;
-            background: #fff;
-            border-radius: 10px;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
-        /* Thermometer */
-        .therm-body {
-            position: absolute;
-            left: 60px; top: 80px;
-            width: 28px; height: 140px;
-            border: 2.5px solid #555;
-            border-radius: 6px 6px 0 0;
-            background: #f0f8ff;
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            background: #f0f4f8;
+            color: #333;
+        }
+
+        /* ── Navbar ──────────────────────────────── */
+        .navbar {
+            background: #1a1a2e !important;
+        }
+
+        .navbar-brand {
+            font-size: 1rem;
+            letter-spacing: 0.3px;
+        }
+
+        /* ── Page title ──────────────────────────── */
+        .page-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+
+        .page-subtitle {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        /* ── Cards ────────────────────────────────── */
+        .card {
+            border: none !important;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
+            background: #fff;
+        }
+
+        .card-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #374151;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ── Band diagram canvas ─────────────────── */
+        #bandCanvas {
+            display: block;
+            border-radius: 12px;
+            width: 100%;
+        }
+
+        /* ── Thermometer ─────────────────────────── */
+        .therm-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .therm-tube {
+            width: 20px;
+            height: 120px;
+            border: 2.5px solid #6b7280;
+            border-radius: 10px 10px 0 0;
+            background: #e8f4f8;
+            position: relative;
             overflow: hidden;
         }
-        .therm-fill {
+
+        .therm-mercury {
             position: absolute;
-            bottom: 0; left: 0; right: 0;
-            background: linear-gradient(to top, #e74c3c, #f39c12);
-            transition: height 0.6s ease;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, #ef4444, #f97316);
+            transition: height 0.5s cubic-bezier(.4, 0, .2, 1);
+            border-radius: 0 0 8px 8px;
         }
+
         .therm-bulb {
-            position: absolute;
-            left: 52px; top: 217px;
-            width: 44px; height: 44px;
-            background: radial-gradient(circle at 40% 40%, #f66, #c0392b);
-            border: 2.5px solid #555;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
+            border: 2.5px solid #6b7280;
+            background: radial-gradient(circle at 38% 35%, #ff6b6b, #c0392b);
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+            margin-top: -2px;
+            transition: box-shadow 0.5s ease;
         }
+
         .therm-label {
-            position: absolute;
-            left: 22px; top: 62px;
-            font-size: 0.72rem;
-            font-weight: bold;
-            color: #555;
-            text-align: center;
-            width: 100px;
-        }
-        .temp-display {
-            position: absolute;
-            left: 18px; top: 270px;
-            font-size: 0.85rem;
-            font-weight: bold;
-            color: #c0392b;
-            width: 120px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #6b7280;
             text-align: center;
         }
 
-        /* Semiconductor chip */
-        .chip-body {
-            position: absolute;
-            left: 180px; top: 110px;
-            width: 110px; height: 100px;
-            background: linear-gradient(135deg, #2d3436, #636e72);
-            border-radius: 8px;
-            border: 2px solid #2d3436;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
+        .temp-readout {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #ef4444;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .celsius-readout {
+            font-size: 0.78rem;
+            color: #9ca3af;
+            text-align: center;
+        }
+
+        /* ── Resistance display ──────────────────── */
+        .resistance-panel {
+            background: #1a1a2e;
+            border-radius: 14px;
+            padding: 14px 20px;
+            text-align: center;
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(26, 26, 46, 0.25);
+        }
+
+        .resistance-panel .r-label {
+            font-size: 0.65rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #9ca3af;
+            margin-bottom: 4px;
+        }
+
+        .resistance-panel .r-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #f472b6;
+            font-family: 'Courier New', monospace;
+            line-height: 1;
+        }
+
+        .resistance-panel .r-unit {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            margin-top: 2px;
+        }
+
+        /* ── Carrier count badge ─────────────────── */
+        .carrier-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #fef3c7;
+            border: 1.5px solid #fbbf24;
+            border-radius: 99px;
+            padding: 4px 12px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #92400e;
+            transition: all 0.3s ease;
+        }
+
+        .carrier-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #3b82f6;
+            box-shadow: 0 0 6px #3b82f6;
+        }
+
+        /* ── Temperature slider ──────────────────── */
+        .temp-slider-wrap {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 16px 20px;
+            border: 1.5px solid #e5e7eb;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+            background: linear-gradient(to right, #ef4444, #f97316, #eab308);
+            margin: 8px 0;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #fff;
+            border: 3px solid #ef4444;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+            cursor: grab;
+        }
+
+        input[type=range]:active::-webkit-slider-thumb {
+            cursor: grabbing;
+        }
+
+        /* ── Table ────────────────────────────────── */
+        .obs-table-wrap {
+            height: 260px;
+            overflow-y: auto;
+        }
+
+        #obs-table thead th {
+            background: #1a1a2e;
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.78rem;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+
+        #obs-table tbody tr {
+            transition: background 0.2s;
+        }
+
+        #obs-table tbody tr:hover {
+            background: #eff6ff;
+        }
+
+        #obs-table td {
+            font-size: 0.82rem;
+            padding: 5px 8px;
+        }
+
+        /* ── Buttons ─────────────────────────────── */
+        .btn-record {
+            background: #2563eb;
+            border: none;
+            color: #fff;
+            font-weight: 600;
+            border-radius: 10px;
+        }
+
+        .btn-record:hover {
+            background: #1d4ed8;
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        .btn-calc {
+            background: #16a34a;
+            border: none;
+            color: #fff;
+            font-weight: 600;
+            border-radius: 10px;
+        }
+
+        .btn-calc:hover {
+            background: #15803d;
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        .btn-pdf {
+            background: #dc2626;
+            border: none;
+            color: #fff;
+            font-weight: 600;
+            border-radius: 10px;
+        }
+
+        .btn-pdf:hover {
+            background: #b91c1c;
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        .btn-clear {
+            background: transparent;
+            border: 1.5px solid #9ca3af;
+            color: #6b7280;
+            border-radius: 10px;
+            font-size: 0.85rem;
+        }
+
+        .btn-clear:hover {
+            background: #f3f4f6;
+            border-color: #6b7280;
+            color: #374151;
+        }
+
+        .btn {
+            transition: all 0.18s ease;
+        }
+
+        /* ── Chart ────────────────────────────────── */
+        .chart-wrap {
+            position: relative;
+            height: 280px;
+        }
+
+        /* ── Formula box ──────────────────────────── */
+        .formula-box {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 16px;
+            padding: 20px 28px;
+            color: #fff;
+            text-align: center;
+        }
+
+        .formula-box .formula-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #9ca3af;
+            margin-bottom: 8px;
+        }
+
+        .formula-box .formula-eq {
+            font-size: 1.3rem;
+            color: #fbbf24;
+        }
+
+        .formula-box .formula-note {
+            font-size: 0.78rem;
+            color: #9ca3af;
+            margin-top: 8px;
+        }
+
+        /* ── Result card ─────────────────────────── */
+        .result-card {
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .result-hero {
+            background: linear-gradient(135deg, #1e3a5f, #1a1a2e);
+            padding: 24px;
+            text-align: center;
             color: #fff;
         }
-        .chip-body .chip-label { font-size: 0.65rem; opacity: 0.8; letter-spacing: 1px; }
-        .chip-body .chip-name  { font-size: 1rem; font-weight: bold; }
-        .chip-pin {
-            position: absolute;
-            background: #b2bec3;
-            border-radius: 2px;
-        }
-        .chip-pin.top    { top: -10px; left: 50%; transform: translateX(-50%); width: 6px; height: 12px; }
-        .chip-pin.bottom { bottom: -10px; left: 50%; transform: translateX(-50%); width: 6px; height: 12px; }
-        .chip-pin.left   { left: -10px; top: 50%; transform: translateY(-50%); width: 12px; height: 6px; }
-        .chip-pin.right  { right: -10px; top: 50%; transform: translateY(-50%); width: 12px; height: 6px; }
 
-        /* Ohmmeter */
-        .ohm-meter {
-            position: absolute;
-            right: 30px; top: 90px;
-            width: 100px; height: 110px;
-            background: #fff;
-            border: 2px solid #333;
-            border-radius: 10px;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            box-shadow: 2px 4px 8px rgba(0,0,0,0.15);
-        }
-        .ohm-label  { font-size: 0.65rem; font-weight: bold; color: #555; letter-spacing: 1px; }
-        .ohm-value  { font-size: 1.15rem; font-weight: bold; color: #d63384; font-family: monospace; }
-        .ohm-unit   { font-size: 0.7rem; color: #888; }
-
-        /* Wires */
-        .wire {
-            position: absolute;
-            background: #e74c3c;
-            border-radius: 3px;
+        .result-hero .eg-value {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: #fbbf24;
         }
 
-        /* Heating plate indicator */
-        .heat-plate {
-            position: absolute;
-            left: 155px; top: 215px;
-            width: 160px; height: 10px;
-            border-radius: 4px;
-            transition: background 0.6s ease, box-shadow 0.6s ease;
+        .result-hero .eg-label {
+            font-size: 0.85rem;
+            color: #9ca3af;
         }
 
-        /* Graph container */
-        .chart-container {
-            position: relative;
-            height: 260px;
-            width: 100%;
+        /* ── Hover glow on band canvas card ─────── */
+        .band-card:hover {
+            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.18);
         }
 
-        .table-container { min-height: 260px; }
+        /* ── Pulse animation helper ───────────────── */
+        @keyframes pulse-glow {
 
-        .slider-container {
-            background: #fff;
-            padding: 12px 15px;
-            border-radius: 8px;
-            border: 1px solid #eaeaea;
+            0%,
+            100% {
+                box-shadow: 0 0 6px #3b82f6, 0 0 12px rgba(59, 130, 246, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 14px #3b82f6, 0 0 28px rgba(59, 130, 246, 0.65);
+            }
         }
     </style>
+    <link rel="stylesheet" href="../../css/vlabs-theme.css">
 </head>
 
 <body>
-    <nav class="navbar navbar-dark bg-dark shadow-sm mb-4">
+
+    <nav class="navbar navbar-dark shadow-sm mb-4">
         <div class="container">
             <span class="navbar-brand mb-0 h1 fw-bold">PICT Physics Virtual Lab</span>
             <a href="../../index.html" class="btn btn-outline-light btn-sm fw-bold">Home Page</a>
@@ -157,82 +404,87 @@
     </nav>
 
     <div class="container mb-5">
+
+        <!-- ── Title ───────────────────────────────── -->
         <div class="text-center mb-4">
-            <h3 class="fw-bold text-dark mb-0">Determination of Energy Band Gap</h3>
-            <p class="text-muted small">Using a Semiconductor (Germanium) by Resistance vs. Temperature Method</p>
+            <h1 class="page-title">Determination of Energy Band Gap</h1>
+            <p class="page-subtitle">Germanium Semiconductor — Resistance vs. Temperature Method</p>
         </div>
 
         <div class="row g-4">
 
-            <!-- LEFT: Circuit / Device Setup -->
+            <!-- ═══════════════════════════════════════
+             LEFT COLUMN: Visual Simulation
+        ════════════════════════════════════════ -->
             <div class="col-lg-7">
-                <div class="card shadow-sm border-0 p-3">
-                    <h5 class="text-center mb-3 border-bottom pb-2">Experimental Setup</h5>
 
-                    <!-- Device Drawing -->
-                    <div class="device-container" id="device-area">
-
-                        <!-- Thermometer -->
-                        <div class="therm-label">Thermometer</div>
-                        <div class="therm-body">
-                            <div class="therm-fill" id="therm-fill" style="height:30%"></div>
-                        </div>
-                        <div class="therm-bulb"></div>
-                        <div class="temp-display" id="temp-display">T = 300 K</div>
-
-                        <!-- Wire from thermometer to chip (indicative) -->
-                        <div class="wire" style="left:106px; top:234px; width:76px; height:3px;"></div>
-
-                        <!-- Semiconductor Chip -->
-                        <div class="chip-body" id="chip-body">
-                            <div class="chip-pin top"></div>
-                            <div class="chip-pin bottom"></div>
-                            <div class="chip-pin left"></div>
-                            <div class="chip-pin right"></div>
-                            <span class="chip-label">SEMICONDUCTOR</span>
-                            <span class="chip-name">Ge</span>
-                        </div>
-
-                        <!-- Heating plate glow under chip -->
-                        <div class="heat-plate" id="heat-plate"></div>
-
-                        <!-- Wires from chip to ohmmeter -->
-                        <div class="wire" style="left:292px; top:154px; width:55px; height:3px;"></div>
-                        <div class="wire" style="left:292px; top:168px; width:55px; height:3px; background:#2980b9;"></div>
-
-                        <!-- Ohmmeter -->
-                        <div class="ohm-meter">
-                            <div class="ohm-label">RESISTANCE</div>
-                            <div class="ohm-value" id="r-meter">---</div>
-                            <div class="ohm-unit">Ω (kΩ)</div>
-                        </div>
-
+                <!-- Energy Band Diagram Card -->
+                <div class="card band-card p-3 mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="card-title">⚛ Energy Band Diagram</span>
+                        <span class="carrier-badge">
+                            <span class="carrier-dot"></span>
+                            Electrons in conduction band: <strong id="carrier-count">0</strong>
+                        </span>
                     </div>
-
-                    <!-- Controls -->
-                    <div class="mt-3 p-3 bg-light rounded border">
-                        <div class="slider-container">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <label class="fw-bold text-danger mb-0 small">Temperature (K)</label>
-                                <span class="badge bg-danger px-2 py-1"><span id="temp-badge">300</span> K</span>
-                            </div>
-                            <input type="range" id="temp-slider" class="form-range" min="300" max="500" step="5" value="300">
-                            <div class="text-muted mt-1" style="font-size:0.75rem; text-align:right;">
-                                Range: 300 K – 500 K (27°C – 227°C)
-                            </div>
-                        </div>
+                    <canvas id="bandCanvas" height="220"></canvas>
+                    <div class="d-flex justify-content-between mt-2 px-1" style="font-size:0.72rem; color:#9ca3af;">
+                        <span>Valence Band (filled)</span>
+                        <span id="eg-label-live" style="color:#fbbf24; font-weight:600;">Eg = 0.67 eV</span>
+                        <span>Conduction Band</span>
                     </div>
                 </div>
+
+                <!-- Bottom row: Thermometer + Resistance + Slider -->
+                <div class="card p-3">
+                    <div class="row align-items-center g-3">
+
+                        <!-- Thermometer -->
+                        <div class="col-auto d-flex flex-column align-items-center gap-1">
+                            <div class="therm-label">Thermometer</div>
+                            <div class="therm-tube">
+                                <div class="therm-mercury" id="therm-mercury" style="height:0%"></div>
+                            </div>
+                            <div class="therm-bulb" id="therm-bulb"></div>
+                            <div class="temp-readout" id="temp-readout">300 K</div>
+                            <div class="celsius-readout" id="celsius-readout">27 °C</div>
+                        </div>
+
+                        <!-- Slider + Resistance -->
+                        <div class="col">
+                            <div class="temp-slider-wrap mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <label class="fw-bold" style="font-size:0.85rem; color:#374151;">Temperature</label>
+                                    <span class="badge text-bg-danger px-3 py-2 fs-6" id="temp-badge">300 K</span>
+                                </div>
+                                <input type="range" id="temp-slider" min="300" max="500" step="5" value="300">
+                                <div class="d-flex justify-content-between" style="font-size:0.7rem; color:#9ca3af;">
+                                    <span>300 K (27°C)</span><span>500 K (227°C)</span>
+                                </div>
+                            </div>
+
+                            <div class="bg-white p-3 rounded shadow-sm border text-center w-100 mt-2">
+                                <h6 class="text-muted mb-2 text-uppercase" style="font-size: 0.75rem; letter-spacing: 1px;">Resistance</h6>
+                                <div class="fs-2 fw-bold text-primary" id="r-meter" style="font-family: 'Courier New', monospace; line-height: 1.2;">---</div>
+                                <small class="text-muted">kΩ</small>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
             </div>
 
-            <!-- RIGHT: Observations Table -->
+            <!-- ═══════════════════════════════════════
+             RIGHT COLUMN: Observations & Controls
+        ════════════════════════════════════════ -->
             <div class="col-lg-5">
-                <div class="card shadow-sm border-0 h-100 p-3 d-flex flex-column">
-                    <h5 class="fw-bold mb-3 text-center border-bottom pb-2">Observations</h5>
+                <div class="card p-3 h-100 d-flex flex-column">
+                    <span class="card-title mb-3">📋 Observations</span>
 
-                    <div class="table-responsive table-container mb-3" style="height:270px;">
-                        <table id="obs-table" class="table table-sm table-hover text-center align-middle" style="font-size:0.85rem;">
-                            <thead class="table-dark">
+                    <div class="obs-table-wrap mb-3">
+                        <table id="obs-table" class="table table-sm table-hover text-center align-middle w-100">
+                            <thead>
                                 <tr>
                                     <th>#</th>
                                     <th>T (K)</th>
@@ -245,52 +497,58 @@
                         </table>
                     </div>
 
-                    <div class="mt-auto row g-2">
-                        <div class="col-12">
-                            <button id="add-reading" class="btn btn-primary w-100 py-2 fw-bold shadow-sm">Record Reading</button>
+                    <!-- Buttons -->
+                    <div class="mt-auto d-flex flex-column gap-2">
+                        <button id="add-reading" class="btn btn-record py-2 w-100">⊕ Record Reading</button>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <button onclick="calculateBandGap()" class="btn btn-calc py-2 w-100">Calculate
+                                    Eg</button>
+                            </div>
+                            <div class="col-6">
+                                <button id="download-pdf" class="btn btn-pdf py-2 w-100">Download PDF</button>
+                            </div>
                         </div>
-                        <div class="col-6">
-                            <button onclick="calculateBandGap()" class="btn btn-success w-100 py-2 fw-bold shadow-sm">Calculate Eg</button>
-                        </div>
-                        <div class="col-6">
-                            <button id="download-pdf" class="btn btn-danger w-100 py-2 text-white fw-bold shadow-sm">Download PDF</button>
-                        </div>
-                        <div class="col-12">
-                            <button id="clear-data" class="btn btn-outline-secondary w-100 py-1 btn-sm">Clear Table</button>
-                        </div>
+                        <button id="clear-data" class="btn btn-clear py-1 w-100">Clear Table</button>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Formula Row -->
-        <div class="row mt-4">
-            <div class="col-12 text-center">
-                <div class="bg-white p-3 rounded shadow-sm border d-inline-block">
-                    <h6 class="text-muted mb-2">Governing Relation</h6>
-                    <span class="fs-5">$$ \ln(R) = \frac{E_g}{2kT} + C $$</span>
-                    <small class="text-muted d-block mt-2">
-                        Slope of $\ln(R)$ vs $\dfrac{1}{T}$ graph $= \dfrac{E_g}{2k}$, &nbsp;
-                        where $k = 8.617 \times 10^{-5}$ eV/K
-                    </small>
+        </div><!-- /row -->
+
+        <!-- ── Formula + Graph Row ──────────────────── -->
+        <div class="row g-4 mt-2">
+
+            <div class="col-md-4">
+                <div class="text-center h-100 d-flex align-items-center justify-content-center">
+                    <div class="bg-white p-3 rounded shadow-sm border d-inline-block w-100">
+                        <h6 class="text-muted mb-2">Governing Relation</h6>
+                        <span class="fs-5">$$ \ln(R) = \frac{E_g}{2kT} + C $$</span>
+                        <small class="text-muted d-block mt-2">
+                            Slope $= \dfrac{E_g}{2k}$<br>
+                            $k = 8.617 \times 10^{-5}$ eV/K
+                        </small>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Graph Row -->
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="card shadow-sm border-0 p-3">
-                    <h5 class="text-center mb-3 border-bottom pb-2">Graph: ln(R) vs 1/T</h5>
-                    <div class="chart-container">
+            <div class="col-md-8">
+                <div class="card p-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="card-title">📈 Graph: ln(R) vs 1/T</span>
+                        <span class="badge text-bg-secondary" id="points-badge">0 points</span>
+                    </div>
+                    <div class="chart-wrap">
                         <canvas id="bandGapChart"></canvas>
                     </div>
                 </div>
             </div>
+
         </div>
 
-        <!-- Calculation Output -->
-        <div id="calculation-output" class="mt-4 pb-5"></div>
+        <!-- ── Calculation output ───────────────────── -->
+        <div id="calculation-output" class="mt-4 pb-4"></div>
+
     </div>
 
     <script src="simulation.js"></script>

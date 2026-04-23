@@ -2,249 +2,395 @@
 <html lang="en">
 
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PICT Quantum Physics Virtual Lab</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PICT Quantum Physics Virtual Lab</title>
 
-<style>
-/* GLOBAL */
-*{ box-sizing:border-box; }
+    <style>
+        /* GLOBAL */
+        * {
+            box-sizing: border-box;
+        }
 
-body{
-margin:0;
-font-family:Arial, Helvetica, sans-serif;
-background:linear-gradient(135deg,#eef2ff,#dbe4ff);
-overflow-x:hidden;
-}
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: linear-gradient(135deg, #eef2ff, #dbe4ff);
+            overflow-x: hidden;
+        }
 
-/* PARTICLE BACKGROUND */
-.particles span{
-position:absolute;
-display:block;
-width:6px;
-height:6px;
-background:#2e59d9;
-border-radius:50%;
-opacity:0.3;
-animation:float 12s linear infinite;
-}
+        /* PARTICLE BACKGROUND */
+        .particles span {
+            position: absolute;
+            display: block;
+            width: 6px;
+            height: 6px;
+            background: #2e59d9;
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float 12s linear infinite;
+        }
 
-@keyframes float{
-0%{ transform:translateY(100vh); opacity:0; }
-50%{ opacity:0.4; }
-100%{ transform:translateY(-10vh); opacity:0; }
-}
+        @keyframes float {
+            0% {
+                transform: translateY(100vh);
+                opacity: 0;
+            }
 
-/* HEADER */
-header{ background:#1f3c88; color:white; text-align:center; padding:35px; }
-header h1{ margin:0; }
-header p{ opacity:0.9; margin-top:10px; }
+            50% {
+                opacity: 0.4;
+            }
 
-/* NAV */
-nav{ background:#2e59d9; padding:12px; text-align:center; }
-nav a{ color:white; font-weight:bold; text-decoration:none; }
+            100% {
+                transform: translateY(-10vh);
+                opacity: 0;
+            }
+        }
 
-/* INTRO */
-.intro{ max-width:800px; margin:auto; padding:30px; text-align:center; color:#333; }
+        /* HEADER */
+        header {
+            background: #1f3c88;
+            color: white;
+            text-align: center;
+            padding: 35px;
+        }
 
-/* SEARCH */
-.search-container{ text-align:center; margin-bottom:30px; }
-.search-container input{ width:300px; padding:10px; border-radius:5px; border:1px solid #ccc; }
+        header h1 {
+            margin: 0;
+        }
 
-/* GRID */
-.container{ width:85%; margin:auto; }
-.experiment-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:35px; }
+        header p {
+            opacity: 0.9;
+            margin-top: 10px;
+        }
 
-/* CARD */
-.flip-card{ height:280px; perspective:1200px; }
+        /* NAV */
+        nav {
+            background: #2e59d9;
+            padding: 12px;
+            text-align: center;
+        }
 
-/* CARD ENTRANCE ANIMATION */
-.flip-card{ opacity:0; transform:translateY(30px); animation:cardAppear 0.7s forwards; }
-.flip-card:nth-child(2){ animation-delay:0.2s; }
-.flip-card:nth-child(3){ animation-delay:0.4s; }
-.flip-card:nth-child(4){ animation-delay:0.6s; }
+        nav a {
+            color: white;
+            font-weight: bold;
+            text-decoration: none;
+        }
 
-@keyframes cardAppear{
-to{ opacity:1; transform:translateY(0); }
-}
+        /* INTRO */
+        .intro {
+            max-width: 800px;
+            margin: auto;
+            padding: 30px;
+            text-align: center;
+            color: #333;
+        }
 
-/* INNER */
-.flip-card-inner{
-position:relative; width:100%; height:100%;
-transition:transform 0.8s cubic-bezier(.4,.2,.2,1); transform-style:preserve-3d;
-}
+        /* SEARCH */
+        .search-container {
+            text-align: center;
+            margin-bottom: 30px;
+        }
 
-/* ROTATION */
-.flip-card:hover .flip-card-inner{ transform:rotateY(180deg) scale(1.04); }
+        .search-container input {
+            width: 300px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
 
-/* FRONT + BACK */
-.flip-card-front,
-.flip-card-back{
-position:absolute; width:100%; height:100%; border-radius:12px;
-box-shadow:0 6px 18px rgba(0,0,0,0.18); backface-visibility:hidden;
-display:flex; flex-direction:column; justify-content:center; align-items:center;
-padding:20px; text-align:center;
-}
+        /* GRID */
+        .container {
+            width: 85%;
+            margin: auto;
+        }
 
-/* FRONT */
-.flip-card-front{ background:white; }
+        .experiment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 35px;
+        }
 
-/* HOVER GLOW */
-.flip-card:hover .flip-card-front{
-box-shadow: 0 10px 25px rgba(0,0,0,0.2), 0 0 15px rgba(46,89,217,0.35);
-}
+        /* CARD */
+        .flip-card {
+            height: 280px;
+            perspective: 1200px;
+        }
 
-/* BACK */
-.flip-card-back{ background:#1f3c88; color:white; transform:rotateY(180deg); }
+        /* CARD ENTRANCE ANIMATION */
+        .flip-card {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: cardAppear 0.7s forwards;
+        }
 
-/* BUTTON */
-button{
-margin-top:15px; padding:10px 16px; border:none; border-radius:6px;
-background:#2e59d9; color:white; cursor:pointer; font-weight:bold; transition:0.2s;
-}
+        .flip-card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
 
-button:hover{ background:#1a3eb6; transform:scale(1.05); }
+        .flip-card:nth-child(3) {
+            animation-delay: 0.4s;
+        }
 
-/* FOOTER */
-footer{ margin-top:60px; background:#1f3c88; color:white; text-align:center; padding:25px; font-size:14px; }
+        .flip-card:nth-child(4) {
+            animation-delay: 0.6s;
+        }
 
-/* RESPONSIVE */
-@media(max-width:600px){
-.search-container input{ width:90%; }
-}
-</style>
+        @keyframes cardAppear {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* INNER */
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.8s cubic-bezier(.4, .2, .2, 1);
+            transform-style: preserve-3d;
+        }
+
+        /* ROTATION */
+        .flip-card:hover .flip-card-inner {
+            transform: rotateY(180deg) scale(1.04);
+        }
+
+        /* FRONT + BACK */
+        .flip-card-front,
+        .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+        }
+
+        /* FRONT */
+        .flip-card-front {
+            background: white;
+        }
+
+        /* HOVER GLOW */
+        .flip-card:hover .flip-card-front {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2), 0 0 15px rgba(46, 89, 217, 0.35);
+        }
+
+        /* BACK */
+        .flip-card-back {
+            background: #1f3c88;
+            color: white;
+            transform: rotateY(180deg);
+        }
+
+        /* BUTTON */
+        button {
+            margin-top: 15px;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            background: #2e59d9;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #1a3eb6;
+            transform: scale(1.05);
+        }
+
+        /* FOOTER */
+        footer {
+            margin-top: 60px;
+            background: #1f3c88;
+            color: white;
+            text-align: center;
+            padding: 25px;
+            font-size: 14px;
+        }
+
+        /* RESPONSIVE */
+        @media(max-width:600px) {
+            .search-container input {
+                width: 90%;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-<div class="particles">
-<span style="left:10%; animation-duration:12s;"></span>
-<span style="left:20%; animation-duration:15s;"></span>
-<span style="left:30%; animation-duration:10s;"></span>
-<span style="left:40%; animation-duration:18s;"></span>
-<span style="left:55%; animation-duration:13s;"></span>
-<span style="left:70%; animation-duration:16s;"></span>
-<span style="left:85%; animation-duration:11s;"></span>
-</div>
-
-<header>
-<h1>PICT Quantum Physics Virtual Lab</h1>
-<p>Interactive simulations to explore fundamental quantum physics experiments</p>
-</header>
-
-<nav>
-<a href="#">Home</a>
-</nav>
-
-<div class="intro">
-<p>
-Welcome to the <b>PICT Quantum Physics Virtual Lab</b>.
-This platform allows students to explore fundamental
-quantum mechanics experiments through interactive
-simulations and visualizations.
-</p>
-</div>
-
-<div class="search-container">
-<input type="text" id="searchBox" placeholder="Search experiments..." onkeyup="searchExperiments()">
-</div>
-
-<div class="container">
-<div class="experiment-grid">
-
-<div class="flip-card">
-<div class="flip-card-inner">
-<div class="flip-card-front">
-<h3>⚛ Heisenberg Uncertainty Principle</h3>
-<p>Hover to view experiment</p>
-</div>
-<div class="flip-card-back">
-<p>
-Visualize the fundamental quantum limitation
-between position and momentum of a particle
-as described by Heisenberg's uncertainty principle.
-</p>
-<button onclick="location.href='experiments/exp2/index.html'">Start Experiment</button>
-</div>
-</div>
-</div>
-
-<div class="flip-card">
-<div class="flip-card-inner">
-<div class="flip-card-front">
-<h3>🌈 Determination of Planck's Constant</h3>
-<p>Hover to view experiment</p>
-</div>
-<div class="flip-card-back">
-<p>
-Simulate the photoelectric effect and determine
-Planck's constant by analyzing stopping potential
-versus incident light frequency.
-</p>
-<button onclick="location.href = 'experiments/exp1/index.html'">Start Experiment</button>
-</div>
-</div>
-</div>
-
-<div class="flip-card">
-<div class="flip-card-inner">
-<div class="flip-card-front">
-<h3>🔬 Determination of Energy Band Gap</h3>
-<p>Hover to view experiment</p>
-</div>
-<div class="flip-card-back">
-<p>
-Study semiconductor conductivity variation
-with temperature to determine the energy
-band gap of the material.
-</p>
-<button onclick="location.href='experiments/exp3/index.html'">Start Experiment</button>
-</div>
-</div>
-</div>
-
-<div class="flip-card">
-    <div class="flip-card-inner">
-        <div class="flip-card-front">
-            <h3>🔴 Laser Beam Divergence</h3>
-            <p>Hover to view experiment</p>
-        </div>
-        <div class="flip-card-back">
-            <p>
-                Observe how a laser beam spreads as it travels.
-                Measure beam diameter at different distances
-                and calculate the divergence angle.
-            </p>
-            <button onclick="location.href='experiments/exp4/index.html'">Start Experiment</button>
-        </div>
-    </div>
+    <div class="particles">
+        <span style="left:10%; animation-duration:12s;"></span>
+        <span style="left:20%; animation-duration:15s;"></span>
+        <span style="left:30%; animation-duration:10s;"></span>
+        <span style="left:40%; animation-duration:18s;"></span>
+        <span style="left:55%; animation-duration:13s;"></span>
+        <span style="left:70%; animation-duration:16s;"></span>
+        <span style="left:85%; animation-duration:11s;"></span>
     </div>
 
-<div class="flip-card">
-    <div class="flip-card-inner">
-        <div class="flip-card-front">
-            <h3>🔴 Hall Effect</h3>
-            <p>Hover to view experiment</p>
-        </div>
-        <div class="flip-card-back">
-            <p>
-                A magnetic field is applied perpendicular to the direction of an electric current flowing through a conductor or semiconductor.
-            </p>
-            <button onclick="location.href='experiments/exp5/index.html'">Start Experiment</button>
+    <header>
+        <h1>PICT Quantum Physics Virtual Lab</h1>
+        <p>Interactive simulations to explore fundamental quantum physics experiments</p>
+    </header>
+
+    <nav>
+        <a href="#">Home</a>
+    </nav>
+
+    <div class="intro">
+        <p>
+            Welcome to the <b>PICT Quantum Physics Virtual Lab</b>.
+            This platform allows students to explore fundamental
+            quantum mechanics experiments through interactive
+            simulations and visualizations.
+        </p>
+    </div>
+
+    <div class="search-container">
+        <input type="text" id="searchBox" placeholder="Search experiments..." onkeyup="searchExperiments()">
+    </div>
+
+    <div class="container">
+        <div class="experiment-grid">
+
+            <div class="flip-card">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front">
+                        <h3>⚛ Heisenberg Uncertainty Principle</h3>
+                        <p>Hover to view experiment</p>
+                    </div>
+                    <div class="flip-card-back">
+                        <p>
+                            Visualize the fundamental quantum limitation
+                            between position and momentum of a particle
+                            as described by Heisenberg's uncertainty principle.
+                        </p>
+                        <button onclick="location.href='experiments/exp2/index.html'">Start Experiment</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flip-card">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front">
+                        <h3>🌈 Determination of Planck's Constant</h3>
+                        <p>Hover to view experiment</p>
+                    </div>
+                    <div class="flip-card-back">
+                        <p>
+                            Simulate the photoelectric effect and determine
+                            Planck's constant by analyzing stopping potential
+                            versus incident light frequency.
+                        </p>
+                        <button onclick="location.href = 'experiments/exp1/index.html'">Start Experiment</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flip-card">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front">
+                        <h3>🔬 Determination of Energy Band Gap</h3>
+                        <p>Hover to view experiment</p>
+                    </div>
+                    <div class="flip-card-back">
+                        <p>
+                            Study semiconductor conductivity variation
+                            with temperature to determine the energy
+                            band gap of the material.
+                        </p>
+                        <button onclick="location.href='experiments/exp3/index.html'">Start Experiment</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flip-card">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front">
+                        <h3>🔴 Laser Beam Divergence</h3>
+                        <p>Hover to view experiment</p>
+                    </div>
+                    <div class="flip-card-back">
+                        <p>
+                            Observe how a laser beam spreads as it travels.
+                            Measure beam diameter at different distances
+                            and calculate the divergence angle.
+                        </p>
+                        <button onclick="location.href='experiments/exp4/index.html'">Start Experiment</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flip-card">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front">
+                        <h3>🔴 Hall Effect</h3>
+                        <p>Hover to view experiment</p>
+                    </div>
+                    <div class="flip-card-back">
+                        <p>
+                            A magnetic field is applied perpendicular to the direction of an electric current flowing through a conductor or semiconductor.
+                        </p>
+                        <button onclick="location.href='experiments/exp5/index.html'">Start Experiment</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flip-card">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front">
+                        <h3>📏 Hair Thickness via Diffraction</h3>
+                        <p>Hover to view experiment</p>
+                    </div>
+                    <div class="flip-card-back">
+                        <p>
+                            Determine the thickness of a human hair using the diffraction
+                            pattern produced by a laser beam.
+                        </p>
+                        <button onclick="location.href='experiments/exp6/index.html'">Start Experiment</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flip-card">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front">
+                        <h3>🌈 Mercury Spectral Lines via Diffraction</h3>
+                        <p>Hover to view experiment</p>
+                    </div>
+                    <div class="flip-card-back">
+                        <p>
+                            Determine the wavelength of prominent spectral lines of mercury
+                            using a diffraction grating and the screen projection method.
+                        </p>
+                        <button onclick="location.href='experiments/exp7/index.html'">Start Experiment</button>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
-    </div>
 
-</div>
-</div>
+    <footer>
+        <p><b>PICT Quantum Physics Virtual Lab</b></p>
+        <p>Department of Engineering Physics<br>Pune Institute of Computer Technology</p>
+        <p>Developed for Educational Demonstration</p>
+    </footer>
 
-<footer>
-<p><b>PICT Quantum Physics Virtual Lab</b></p>
-<p>Department of Engineering Physics<br>Pune Institute of Computer Technology</p>
-<p>Developed for Educational Demonstration</p>
-</footer>
-
-<script src="main.js"></script>
+    <script src="main.js"></script>
 
 </body>
+
 </html>
