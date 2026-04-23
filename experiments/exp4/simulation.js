@@ -459,50 +459,70 @@ function showResult(html) {
 
 // ─── PDF EXPORT ───────────────────────────────────────────────────────────────
 document.getElementById("download-pdf").addEventListener("click", async function () {
+    if (observations.length === 0) {
+        alert("No data recorded!"); return;
+    }
+
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+    const doc = new jsPDF('p', 'mm', 'a4');
+    const PW = doc.internal.pageSize.getWidth();
 
-    // Header
-    doc.setFillColor(13, 17, 23);
-    doc.rect(0, 0, 210, 30, "F");
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "bold");
-    doc.text("PICT Physics Virtual Lab", 14, 12);
+    doc.setFont('helvetica', 'bold').setFontSize(18);
+    doc.text('PICT Physics Virtual Lab', PW / 2, 15, { align: 'center' });
+    doc.setFontSize(12).setFont('helvetica', 'normal');
+    doc.text('Laser Beam Divergence \u2013 Lab Report', PW / 2, 22, { align: 'center' });
+    doc.line(20, 25, PW - 20, 25);
+
     doc.setFontSize(11);
-    doc.setFont("helvetica", "normal");
-    doc.text("Experiment: Laser Beam Divergence", 14, 22);
+    doc.text('Name: ____________________________________', 20, 35);
+    doc.text('Roll No: __________________', 130, 35);
+    doc.text('Date: ____________________', 20, 43);
 
-    // Metadata
-    doc.setTextColor(40, 40, 40);
-    doc.setFontSize(10);
-    const lambda = parseInt(lambdaSelect.value);
-    const w0mm = parseFloat(waistSlider.value);
-    doc.text(`Wavelength: ${lambda} nm    Beam Waist (w₀): ${w0mm} mm    Date: ${new Date().toLocaleDateString()}`, 14, 40);
+    doc.setFontSize(9).setTextColor(100);
+    doc.text('Formula: \u03B8 = (D\u2082 - D\u2081) / (2 \u00d7 L)', 20, 53);
+    doc.setTextColor(0);
 
-    // Table
+    doc.setFont('helvetica', 'bold').setFontSize(11);
+    doc.text('Observations:', 20, 63);
+
     doc.autoTable({
         head: [["#", "Distance (cm)", "Beam Diameter (mm)"]],
         body: observations.map((o, i) => [i + 1, o.d, o.dia]),
-        startY: 48,
-        styles: { fontSize: 10 },
-        headStyles: { fillColor: [13, 17, 23] },
+        startY: 67,
+        theme: 'grid',
+        headStyles: { fillColor: [26, 26, 46] },
+        styles: { fontSize: 10, cellPadding: 4, halign: 'center' },
+        margin: { left: 20, right: 20 }
     });
 
-    // Result section
+    let y = doc.lastAutoTable.finalY + 12;
+    doc.setFont('helvetica', 'bold').setFontSize(11).setTextColor(0);
+    doc.text('Formula & Calculations:', 20, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text('\u03B8 = (D\u2082 - D\u2081) / (2 \u00d7 L)', 20, y + 8);
+    doc.text('______________________________________', 20, y + 18);
+
+    y += 32;
+    doc.setFont('helvetica', 'bold');
+    doc.text('Result:', 20, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Calculated Divergence (\u03B8) = _____________ mrad', 20, y + 8);
+    doc.text('Full Angle (2\u03B8) = _____________ mrad', 20, y + 16);
+    
+    y += 16;
+    doc.setFont('helvetica', 'bold');
+    doc.text('Conclusion: __________________________________________________', 20, y + 16);
+
     if (observations.length >= 2) {
         const first = observations[0];
         const last = observations[observations.length - 1];
         const D1 = parseFloat(first.dia), D2 = parseFloat(last.dia);
         const L = (parseFloat(last.d) - parseFloat(first.d)) * 10;
-        const th = ((D2 - D1) / L * 1000).toFixed(4);
+        const th_rad = (D2 - D1) / (L * 2);
+        const th_mrad = (th_rad * 1000).toFixed(4);
 
-        const finalY = doc.lastAutoTable.finalY + 12;
-        doc.setFont("helvetica", "bold");
-        doc.text("Calculated Divergence", 14, finalY);
-        doc.setFont("helvetica", "normal");
-        doc.text(`Half-angle θ = ${th} mrad`, 14, finalY + 8);
-        doc.text(`Formula: θ = (D₂ - D₁) / (2 · L)`, 14, finalY + 16);
+        doc.setTextColor(30, 80, 160);
+        doc.text(`[Computed] Divergence \u03B8 = ${th_mrad} mrad`, 20, y + 36);
     }
 
     doc.save("Laser_Divergence_Report.pdf");
