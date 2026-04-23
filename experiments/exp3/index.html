@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exp 3: Energy Band Gap | Virtual Lab</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <link rel="stylesheet" href="../../css/experiment.css">
+
+    <style>
+        body { background-color: #f4f6f9; color: #333; }
+        .card { border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+
+        /* Semiconductor device drawing */
+        .device-container {
+            position: relative;
+            width: 100%;
+            height: 320px;
+            background: #fff;
+            border-radius: 10px;
+        }
+
+        /* Thermometer */
+        .therm-body {
+            position: absolute;
+            left: 60px; top: 80px;
+            width: 28px; height: 140px;
+            border: 2.5px solid #555;
+            border-radius: 6px 6px 0 0;
+            background: #f0f8ff;
+            overflow: hidden;
+        }
+        .therm-fill {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            background: linear-gradient(to top, #e74c3c, #f39c12);
+            transition: height 0.6s ease;
+        }
+        .therm-bulb {
+            position: absolute;
+            left: 52px; top: 217px;
+            width: 44px; height: 44px;
+            background: radial-gradient(circle at 40% 40%, #f66, #c0392b);
+            border: 2.5px solid #555;
+            border-radius: 50%;
+        }
+        .therm-label {
+            position: absolute;
+            left: 22px; top: 62px;
+            font-size: 0.72rem;
+            font-weight: bold;
+            color: #555;
+            text-align: center;
+            width: 100px;
+        }
+        .temp-display {
+            position: absolute;
+            left: 18px; top: 270px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #c0392b;
+            width: 120px;
+            text-align: center;
+        }
+
+        /* Semiconductor chip */
+        .chip-body {
+            position: absolute;
+            left: 180px; top: 110px;
+            width: 110px; height: 100px;
+            background: linear-gradient(135deg, #2d3436, #636e72);
+            border-radius: 8px;
+            border: 2px solid #2d3436;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            color: #fff;
+        }
+        .chip-body .chip-label { font-size: 0.65rem; opacity: 0.8; letter-spacing: 1px; }
+        .chip-body .chip-name  { font-size: 1rem; font-weight: bold; }
+        .chip-pin {
+            position: absolute;
+            background: #b2bec3;
+            border-radius: 2px;
+        }
+        .chip-pin.top    { top: -10px; left: 50%; transform: translateX(-50%); width: 6px; height: 12px; }
+        .chip-pin.bottom { bottom: -10px; left: 50%; transform: translateX(-50%); width: 6px; height: 12px; }
+        .chip-pin.left   { left: -10px; top: 50%; transform: translateY(-50%); width: 12px; height: 6px; }
+        .chip-pin.right  { right: -10px; top: 50%; transform: translateY(-50%); width: 12px; height: 6px; }
+
+        /* Ohmmeter */
+        .ohm-meter {
+            position: absolute;
+            right: 30px; top: 90px;
+            width: 100px; height: 110px;
+            background: #fff;
+            border: 2px solid #333;
+            border-radius: 10px;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            box-shadow: 2px 4px 8px rgba(0,0,0,0.15);
+        }
+        .ohm-label  { font-size: 0.65rem; font-weight: bold; color: #555; letter-spacing: 1px; }
+        .ohm-value  { font-size: 1.15rem; font-weight: bold; color: #d63384; font-family: monospace; }
+        .ohm-unit   { font-size: 0.7rem; color: #888; }
+
+        /* Wires */
+        .wire {
+            position: absolute;
+            background: #e74c3c;
+            border-radius: 3px;
+        }
+
+        /* Heating plate indicator */
+        .heat-plate {
+            position: absolute;
+            left: 155px; top: 215px;
+            width: 160px; height: 10px;
+            border-radius: 4px;
+            transition: background 0.6s ease, box-shadow 0.6s ease;
+        }
+
+        /* Graph container */
+        .chart-container {
+            position: relative;
+            height: 260px;
+            width: 100%;
+        }
+
+        .table-container { min-height: 260px; }
+
+        .slider-container {
+            background: #fff;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: 1px solid #eaeaea;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-dark bg-dark shadow-sm mb-4">
+        <div class="container">
+            <span class="navbar-brand mb-0 h1 fw-bold">PICT Physics Virtual Lab</span>
+            <a href="../../index.html" class="btn btn-outline-light btn-sm fw-bold">Home Page</a>
+        </div>
+    </nav>
+
+    <div class="container mb-5">
+        <div class="text-center mb-4">
+            <h3 class="fw-bold text-dark mb-0">Determination of Energy Band Gap</h3>
+            <p class="text-muted small">Using a Semiconductor (Germanium) by Resistance vs. Temperature Method</p>
+        </div>
+
+        <div class="row g-4">
+
+            <!-- LEFT: Circuit / Device Setup -->
+            <div class="col-lg-7">
+                <div class="card shadow-sm border-0 p-3">
+                    <h5 class="text-center mb-3 border-bottom pb-2">Experimental Setup</h5>
+
+                    <!-- Device Drawing -->
+                    <div class="device-container" id="device-area">
+
+                        <!-- Thermometer -->
+                        <div class="therm-label">Thermometer</div>
+                        <div class="therm-body">
+                            <div class="therm-fill" id="therm-fill" style="height:30%"></div>
+                        </div>
+                        <div class="therm-bulb"></div>
+                        <div class="temp-display" id="temp-display">T = 300 K</div>
+
+                        <!-- Wire from thermometer to chip (indicative) -->
+                        <div class="wire" style="left:106px; top:234px; width:76px; height:3px;"></div>
+
+                        <!-- Semiconductor Chip -->
+                        <div class="chip-body" id="chip-body">
+                            <div class="chip-pin top"></div>
+                            <div class="chip-pin bottom"></div>
+                            <div class="chip-pin left"></div>
+                            <div class="chip-pin right"></div>
+                            <span class="chip-label">SEMICONDUCTOR</span>
+                            <span class="chip-name">Ge</span>
+                        </div>
+
+                        <!-- Heating plate glow under chip -->
+                        <div class="heat-plate" id="heat-plate"></div>
+
+                        <!-- Wires from chip to ohmmeter -->
+                        <div class="wire" style="left:292px; top:154px; width:55px; height:3px;"></div>
+                        <div class="wire" style="left:292px; top:168px; width:55px; height:3px; background:#2980b9;"></div>
+
+                        <!-- Ohmmeter -->
+                        <div class="ohm-meter">
+                            <div class="ohm-label">RESISTANCE</div>
+                            <div class="ohm-value" id="r-meter">---</div>
+                            <div class="ohm-unit">Ω (kΩ)</div>
+                        </div>
+
+                    </div>
+
+                    <!-- Controls -->
+                    <div class="mt-3 p-3 bg-light rounded border">
+                        <div class="slider-container">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="fw-bold text-danger mb-0 small">Temperature (K)</label>
+                                <span class="badge bg-danger px-2 py-1"><span id="temp-badge">300</span> K</span>
+                            </div>
+                            <input type="range" id="temp-slider" class="form-range" min="300" max="500" step="5" value="300">
+                            <div class="text-muted mt-1" style="font-size:0.75rem; text-align:right;">
+                                Range: 300 K – 500 K (27°C – 227°C)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: Observations Table -->
+            <div class="col-lg-5">
+                <div class="card shadow-sm border-0 h-100 p-3 d-flex flex-column">
+                    <h5 class="fw-bold mb-3 text-center border-bottom pb-2">Observations</h5>
+
+                    <div class="table-responsive table-container mb-3" style="height:270px;">
+                        <table id="obs-table" class="table table-sm table-hover text-center align-middle" style="font-size:0.85rem;">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>#</th>
+                                    <th>T (K)</th>
+                                    <th>R (kΩ)</th>
+                                    <th>1/T (K⁻¹)</th>
+                                    <th>ln(R)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="obs-body"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-auto row g-2">
+                        <div class="col-12">
+                            <button id="add-reading" class="btn btn-primary w-100 py-2 fw-bold shadow-sm">Record Reading</button>
+                        </div>
+                        <div class="col-6">
+                            <button onclick="calculateBandGap()" class="btn btn-success w-100 py-2 fw-bold shadow-sm">Calculate Eg</button>
+                        </div>
+                        <div class="col-6">
+                            <button id="download-pdf" class="btn btn-danger w-100 py-2 text-white fw-bold shadow-sm">Download PDF</button>
+                        </div>
+                        <div class="col-12">
+                            <button id="clear-data" class="btn btn-outline-secondary w-100 py-1 btn-sm">Clear Table</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formula Row -->
+        <div class="row mt-4">
+            <div class="col-12 text-center">
+                <div class="bg-white p-3 rounded shadow-sm border d-inline-block">
+                    <h6 class="text-muted mb-2">Governing Relation</h6>
+                    <span class="fs-5">$$ \ln(R) = \frac{E_g}{2kT} + C $$</span>
+                    <small class="text-muted d-block mt-2">
+                        Slope of $\ln(R)$ vs $\dfrac{1}{T}$ graph $= \dfrac{E_g}{2k}$, &nbsp;
+                        where $k = 8.617 \times 10^{-5}$ eV/K
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Graph Row -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card shadow-sm border-0 p-3">
+                    <h5 class="text-center mb-3 border-bottom pb-2">Graph: ln(R) vs 1/T</h5>
+                    <div class="chart-container">
+                        <canvas id="bandGapChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calculation Output -->
+        <div id="calculation-output" class="mt-4 pb-5"></div>
+    </div>
+
+    <script src="simulation.js"></script>
+</body>
+
+</html>

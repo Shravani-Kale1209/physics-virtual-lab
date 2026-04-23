@@ -32,14 +32,14 @@ function animateElectrons() {
     ctx.fillRect(40, 40, 270, 100);
     ctx.strokeRect(40, 40, 270, 100);
 
-    // Draw Magnetic Field Indicators (Crosses indicating field into the screen)
+    // Draw Magnetic Field Indicators
     if (magneticField_Tesla > 0) {
         ctx.strokeStyle = '#adb5bd';
         ctx.lineWidth = 1;
         const spacing = 40;
         for (let x = 60; x <= 290; x += spacing) {
             for (let y = 60; y <= 120; y += spacing) {
-                const size = 5 * (magneticField_Tesla / 0.5); // Scale with field strength
+                const size = 5 * (magneticField_Tesla / 0.5);
                 ctx.beginPath();
                 ctx.moveTo(x - size, y - size);
                 ctx.lineTo(x + size, y + size);
@@ -61,17 +61,16 @@ function animateElectrons() {
     }
 
     // Particle Physics and Rendering
-    ctx.fillStyle = '#212529'; // Dark gray/black for electrons
+    ctx.fillStyle = '#212529';
     for (let i = 0; i < particles.length; i++) {
         let p = particles[i];
         p.x += p.vx;
         
-        // Lorentz Force simulation: Deflection based on Magnetic Field
-        // Electrons are negative, so force pushes them downwards or upwards depending on field convention.
+        // Lorentz Force simulation
         p.vy = magneticField_Tesla * current_Milliamperes * 0.015;
         p.y += p.vy;
 
-        // Boundary collision (Charge accumulation)
+        // Boundary collision
         if (p.y > 135) p.y = 135; 
         if (p.y < 45) p.y = 45;
 
@@ -81,7 +80,7 @@ function animateElectrons() {
         ctx.fill();
     }
 
-    // Cleanup particles that exit the right side of the slab
+    // Cleanup particles
     particles = particles.filter(p => p.x < 310);
 
     requestAnimationFrame(animateElectrons);
@@ -98,7 +97,7 @@ function updateSimulation() {
 
     const current_Amperes = current_Milliamperes * 1e-3; 
 
-    // Theoretical Hall Voltage: V_H = (I * B) / (n * e * t)
+    // Theoretical Hall Voltage
     let theoretical_VH_Volts = 0;
     if (current_Amperes > 0 && magneticField_Tesla > 0) {
         theoretical_VH_Volts = (current_Amperes * magneticField_Tesla) / (carrierConcentration * elementalCharge * sampleThickness);
@@ -106,7 +105,6 @@ function updateSimulation() {
 
     let vh_millivolts = theoretical_VH_Volts * 1000;
     
-    // Formal statistical noise implementation
     if (vh_millivolts > 0) {
         const structuralNoise = (Math.random() - 0.5) * 0.4; 
         vh_millivolts += structuralNoise;
@@ -204,10 +202,48 @@ function calculateHallEffect() {
     }
 }
 
-// Event Listeners
+// Event Listeners for Slider Elements
 currentSlider.addEventListener('input', updateSimulation);
 magneticSlider.addEventListener('input', updateSimulation);
 
+// Logic for Increment and Decrement Buttons
+document.getElementById('current-decrease').addEventListener('click', () => {
+    let currentValue = parseFloat(currentSlider.value);
+    const stepValue = parseFloat(currentSlider.step);
+    if (currentValue > parseFloat(currentSlider.min)) {
+        currentSlider.value = (currentValue - stepValue).toFixed(1);
+        updateSimulation();
+    }
+});
+
+document.getElementById('current-increase').addEventListener('click', () => {
+    let currentValue = parseFloat(currentSlider.value);
+    const stepValue = parseFloat(currentSlider.step);
+    if (currentValue < parseFloat(currentSlider.max)) {
+        currentSlider.value = (currentValue + stepValue).toFixed(1);
+        updateSimulation();
+    }
+});
+
+document.getElementById('magnetic-decrease').addEventListener('click', () => {
+    let currentValue = parseFloat(magneticSlider.value);
+    const stepValue = parseFloat(magneticSlider.step);
+    if (currentValue > parseFloat(magneticSlider.min)) {
+        magneticSlider.value = (currentValue - stepValue).toFixed(2);
+        updateSimulation();
+    }
+});
+
+document.getElementById('magnetic-increase').addEventListener('click', () => {
+    let currentValue = parseFloat(magneticSlider.value);
+    const stepValue = parseFloat(magneticSlider.step);
+    if (currentValue < parseFloat(magneticSlider.max)) {
+        magneticSlider.value = (currentValue + stepValue).toFixed(2);
+        updateSimulation();
+    }
+});
+
+// User Interface Action Buttons
 addBtn.addEventListener('click', addRow);
 clearBtn.addEventListener('click', () => {
     observations = [];
@@ -218,27 +254,27 @@ clearBtn.addEventListener('click', () => {
 // Portable Document Format Generation
 document.getElementById('download-pdf').addEventListener('click', async function () {
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF('p', 'mm', 'a4');
-    const pageWidth = doc.internal.pageSize.getWidth();
+    const documentInstance = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = documentInstance.internal.pageSize.getWidth();
 
-    doc.setFont("helvetica", "bold").setFontSize(16);
-    doc.text("PICT Quantum Physics Virtual Lab", pageWidth / 2, 15, { align: 'center' });
-    doc.setFontSize(14).setFont("helvetica", "normal");
-    doc.text("Measurement of Hall Effect - Laboratory Report", pageWidth / 2, 22, { align: 'center' });
-    doc.line(20, 25, pageWidth - 20, 25);
+    documentInstance.setFont("helvetica", "bold").setFontSize(16);
+    documentInstance.text("PICT Quantum Physics Virtual Lab", pageWidth / 2, 15, { align: 'center' });
+    documentInstance.setFontSize(14).setFont("helvetica", "normal");
+    documentInstance.text("Measurement of Hall Effect - Laboratory Report", pageWidth / 2, 22, { align: 'center' });
+    documentInstance.line(20, 25, pageWidth - 20, 25);
 
-    doc.setFont("helvetica", "normal").setFontSize(11);
-    doc.text("Student Name: ____________________________________", 20, 35);
-    doc.text("Registration Number: __________________", 120, 35);
-    doc.text("Date of Experiment: ____________________", 20, 45);
+    documentInstance.setFont("helvetica", "normal").setFontSize(11);
+    documentInstance.text("Student Name: ____________________________________", 20, 35);
+    documentInstance.text("Registration Number: __________________", 120, 35);
+    documentInstance.text("Date of Experiment: ____________________", 20, 45);
 
-    doc.setFont("helvetica", "bold").text("1. Experimental Setup Schematic:", 20, 60);
+    documentInstance.setFont("helvetica", "bold").text("1. Experimental Setup Schematic:", 20, 60);
     const circuitArea = document.querySelector('.circuit-container');
     const circuitCanvas = await html2canvas(circuitArea, { scale: 2 });
-    doc.addImage(circuitCanvas.toDataURL('image/png'), 'PNG', 40, 65, 130, 55);
+    documentInstance.addImage(circuitCanvas.toDataURL('image/png'), 'PNG', 40, 65, 130, 55);
 
-    doc.text("2. Recorded Observations:", 20, 135);
-    doc.autoTable({
+    documentInstance.text("2. Recorded Observations:", 20, 135);
+    documentInstance.autoTable({
         html: '#obs-table',
         startY: 140,
         theme: 'grid',
@@ -247,24 +283,24 @@ document.getElementById('download-pdf').addEventListener('click', async function
         margin: { left: 20, right: 20 }
     });
 
-    let currentY = doc.lastAutoTable.finalY + 15;
-    doc.setFont("helvetica", "bold").text("3. Analytical Calculations:", 20, currentY);
-    doc.setFont("helvetica", "normal");
-    doc.text("Hall Coefficient Formula: R_H = (V_H * t) / (I * B)", 20, currentY + 10);
-    doc.text("Carrier Concentration Formula: n = 1 / (R_H * e)", 20, currentY + 18);
+    let currentY = documentInstance.lastAutoTable.finalY + 15;
+    documentInstance.setFont("helvetica", "bold").text("3. Analytical Calculations:", 20, currentY);
+    documentInstance.setFont("helvetica", "normal");
+    documentInstance.text("Hall Coefficient Formula: R_H = (V_H * t) / (I * B)", 20, currentY + 10);
+    documentInstance.text("Carrier Concentration Formula: n = 1 / (R_H * e)", 20, currentY + 18);
 
     currentY += 35;
-    doc.text("Calculation Space:", 20, currentY);
-    doc.text("_________________________________________________________________________________", 20, currentY + 10);
-    doc.text("_________________________________________________________________________________", 20, currentY + 20);
+    documentInstance.text("Calculation Space:", 20, currentY);
+    documentInstance.text("_________________________________________________________________________________", 20, currentY + 10);
+    documentInstance.text("_________________________________________________________________________________", 20, currentY + 20);
 
     currentY += 40;
-    doc.setFont("helvetica", "bold").text("4. Final Deductions:", 20, currentY);
-    doc.setFont("helvetica", "normal");
-    doc.text("Determined Hall Coefficient (R_H): ____________________ Cubic Meters per Coulomb", 20, currentY + 10);
-    doc.text("Determined Carrier Concentration (n): ____________________ per Cubic Meter", 20, currentY + 20);
+    documentInstance.setFont("helvetica", "bold").text("4. Final Deductions:", 20, currentY);
+    documentInstance.setFont("helvetica", "normal");
+    documentInstance.text("Determined Hall Coefficient (R_H): ____________________ Cubic Meters per Coulomb", 20, currentY + 10);
+    documentInstance.text("Determined Carrier Concentration (n): ____________________ per Cubic Meter", 20, currentY + 20);
 
-    doc.save("Hall_Effect_Laboratory_Report.pdf");
+    documentInstance.save("Hall_Effect_Laboratory_Report.pdf");
 });
 
 // Initialization
