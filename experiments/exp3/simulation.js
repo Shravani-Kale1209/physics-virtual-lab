@@ -390,9 +390,9 @@ function updateSimulation() {
     const bR = Math.round(180 + t * 75);
     thermBulb.style.boxShadow = `0 0 ${10 + t * 20}px rgba(${bR},60,60,${0.55 + t * 0.4})`;
 
-    /* Resistance colour: blue → orange → red */
-    const hue = Math.round(220 - t * 160);
-    rMeter.style.color = `hsl(${hue}, 90%, 60%)`;
+    /* Resistance colour: monochrome based on level */
+    const level = Math.round(255 - t * 180);
+    rMeter.style.color = `rgb(${level > 80 ? level : 80},${level > 80 ? level : 80},${level > 80 ? level : 80})`;
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -438,17 +438,18 @@ const bandGapChart = new Chart(chartCtx, {
         datasets: [
             {
                 label: 'ln(R) vs 1/T  (observed)',
-                borderColor: '#2563eb',
-                backgroundColor: '#3b82f6',
+                borderColor: '#111111',
+                backgroundColor: '#111111',
                 pointRadius: 7, pointHoverRadius: 10,
                 data: []
             },
             {
                 label: 'Best-fit line',
                 type: 'line',
-                borderColor: '#ef4444',
+                borderColor: '#555555',
                 backgroundColor: 'transparent',
                 borderWidth: 2.5, pointRadius: 0,
+                borderDash: [6, 4],
                 tension: 0, data: []
             }
         ]
@@ -457,12 +458,19 @@ const bandGapChart = new Chart(chartCtx, {
         responsive: true, maintainAspectRatio: false,
         animation: { duration: 350 },
         scales: {
-            x: { title: { display: true, text: '1/T  (K⁻¹)', font: { size: 12, weight: '600' } },
-                 ticks: { callback: v => v.toExponential(1) } },
-            y: { title: { display: true, text: 'ln(R)', font: { size: 12, weight: '600' } } }
+            x: {
+                title: { display: true, text: '1/T  (K⁻¹)', font: { size: 12, weight: '600' }, color: '#333333' },
+                ticks: { callback: v => v.toExponential(1), color: '#333333' },
+                grid: { color: 'rgba(0,0,0,0.08)' }
+            },
+            y: {
+                title: { display: true, text: 'ln(R)', font: { size: 12, weight: '600' }, color: '#333333' },
+                ticks: { color: '#333333' },
+                grid: { color: 'rgba(0,0,0,0.08)' }
+            }
         },
         plugins: {
-            legend: { position: 'bottom', labels: { boxWidth: 14, font: { size: 11 } } },
+            legend: { position: 'bottom', labels: { boxWidth: 14, font: { size: 11 }, color: '#333333' } },
             tooltip: { callbacks: { label: it => `1/T=${it.parsed.x.toExponential(3)}, ln(R)=${it.parsed.y.toFixed(4)}` } }
         }
     }

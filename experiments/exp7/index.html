@@ -7,7 +7,7 @@
     <title>Exp 7: Mercury Spectral Wavelength</title>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    
+
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script>
         window.MathJax = {
@@ -18,25 +18,20 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <link rel="stylesheet" href="../../css/vlabs-theme.css">
 
     <style>
         body {
-            background-color: #f8f9fa;
-            color: #333;
-        }
-
-        /* Nav specific overrides */
-        .navbar {
-            background-color: #0b1120 !important;
-            border-bottom: 1px solid #1a233a;
+            background-color: #f5f5f5;
+            color: #111111;
         }
 
         /* ── Canvas Wrap ── */
         .bench-canvas-wrap {
-            background: #06090e; /* Extremely dark for optical bench */
-            border-radius: 6px;
+            background: #0d0d0d;
+            border-radius: 8px;
             padding: 15px;
-            border: 1px solid #dee2e6;
+            border: 1px solid #333333;
             margin-bottom: 20px;
         }
 
@@ -44,7 +39,7 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            color: #00ff41;
+            color: #cccccc;
             font-size: 0.85rem;
             font-weight: 600;
             margin-bottom: 10px;
@@ -53,50 +48,45 @@
         .status-led {
             width: 8px; height: 8px;
             border-radius: 50%;
-            background: #00ff41;
-            box-shadow: 0 0 6px #00ff41;
+            background: #cccccc;
+            box-shadow: 0 0 6px #cccccc;
         }
 
-        /* ── Live readout strip matching standard ── */
+        /* ── Readout strip ── */
         .readout-strip {
             display: flex;
-            border: 1px solid #dee2e6;
+            border: 1px solid #cccccc;
             border-radius: 6px;
             overflow: hidden;
-            background: #fff;
+            background: #f0f0f0;
             margin-bottom: 20px;
         }
-
         .readout-item {
             flex: 1;
             padding: 0.55rem 1rem;
-            border-right: 1px solid #dee2e6;
+            border-right: 1px solid #cccccc;
             text-align: center;
         }
-
-        .readout-item:last-child {
-            border-right: none;
-        }
+        .readout-item:last-child { border-right: none; }
 
         .readout-label {
             font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: #6c757d;
+            color: #555555;
             font-weight: bold;
         }
-
         .readout-value {
             font-size: 1.2rem;
             font-weight: 600;
             font-family: 'Courier New', monospace;
-            color: #1f2937;
+            color: #111111;
         }
 
-        /* Emphasized dynamic colors */
-        .val-focus { color: #2563eb; }
+        /* Remove coloured val-focus class */
+        .val-focus { color: #111111 !important; }
 
-        /* Tables & Typography */
+        /* ── Table ── */
         #obs-table th,
         #obs-table td {
             font-size: 0.95rem;
@@ -104,25 +94,22 @@
             vertical-align: middle;
         }
 
-        /* Physics ref box */
+        /* ── Physics ref ── */
         .physics-ref {
             font-size: 0.85rem;
             font-family: 'Courier New', Courier, monospace;
-            color: #495057;
+            color: #333333;
             line-height: 1.8;
         }
-
         .ref-title {
             font-weight: 700;
-            color: #212529;
+            color: #111111;
             font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-bottom: 5px;
         }
-
     </style>
-    <link rel="stylesheet" href="../../css/vlabs-theme.css">
 </head>
 
 <body class="bg-light">
@@ -130,7 +117,7 @@
     <!-- NAVBAR -->
     <nav class="navbar navbar-dark bg-dark shadow-sm mb-4">
         <div class="container-fluid px-4">
-            <span class="navbar-brand mb-0 h1 fw-bold text-white">PICT Quantum Physics Virtual Lab</span>
+            <span class="navbar-brand mb-0 h1 fw-bold text-white">PICT Physics Virtual Lab</span>
             <a href="../../index.html" class="btn btn-outline-light btn-sm fw-bold">Home Page</a>
         </div>
     </nav>
@@ -157,7 +144,7 @@
                 <canvas id="opticalCanvas" width="1000" height="350" style="width: 100%; border-radius: 4px;"></canvas>
             </div>
 
-            <!-- Light Theme Readout Strip -->
+            <!-- Readout Strip -->
             <div class="readout-strip">
                 <div class="readout-item">
                     <div class="readout-label">Grating Constant (Lines/inch)</div>
@@ -169,18 +156,18 @@
                 </div>
                 <div class="readout-item">
                     <div class="readout-label">Current Spectral Line</div>
-                    <div class="readout-value val-focus" id="val-colorName" style="color: #63b365;">Green</div>
+                    <div class="readout-value val-focus" id="val-colorName">Green</div>
                 </div>
-                <div class="readout-item bg-light">
-                    <div class="readout-label text-primary">Distance of 1st Order (y₁)</div>
-                    <div class="readout-value text-primary"><span id="val-y1">0.00</span> <span style="font-size:0.8rem">cm</span></div>
+                <div class="readout-item bg-white">
+                    <div class="readout-label">Distance of 1st Order (y₁)</div>
+                    <div class="readout-value"><span id="val-y1">0.00</span> <span style="font-size:0.8rem">cm</span></div>
                 </div>
             </div>
 
             <!-- Control Panel -->
             <div class="p-3 bg-light rounded border">
                 <div class="row align-items-center g-3">
-                    
+
                     <div class="col-lg-3">
                         <label class="form-label small fw-bold mb-1">Target Spectral Line:</label>
                         <select id="color-select" class="form-select">
@@ -219,11 +206,11 @@
 
         <!-- BOTTOM AREA: Table & Physics -->
         <div class="row g-4 align-items-start">
-            
+
             <div class="col-lg-7">
                 <div class="card shadow-sm border-0 p-3 h-100 d-flex flex-column">
                     <h5 class="text-center border-bottom pb-2 mb-3 fw-bold">Observation Table</h5>
-                    
+
                     <div class="table-responsive flex-grow-1">
                         <table class="table table-hover text-center align-middle mb-0" id="obs-table">
                             <thead class="table-dark">
@@ -239,7 +226,7 @@
                             <tbody id="obs-body"></tbody>
                         </table>
                     </div>
-                    
+
                     <p id="empty-hint" class="text-center text-muted small mt-3 mb-0">
                         No readings recorded yet.
                     </p>
@@ -254,9 +241,9 @@
             <div class="col-lg-5">
                 <div class="card shadow-sm border-0 p-3 h-100">
                     <h5 class="text-center border-bottom pb-2 mb-3 fw-bold">Physics Reference</h5>
-                    
+
                     <div class="bg-white p-3 rounded border mb-3">
-                        <div class="ref-title text-primary">Diffraction Equation</div>
+                        <div class="ref-title">Diffraction Equation</div>
                         <div class="physics-ref mb-2 text-center fs-5">
                             $d \sin(\theta) = m \lambda$
                         </div>
@@ -267,12 +254,12 @@
                     </div>
 
                     <div class="bg-white p-3 rounded border mt-3">
-                        <div class="ref-title text-primary">Geometry of Screen</div>
+                        <div class="ref-title">Geometry of Screen</div>
                         <div class="physics-ref mb-2 text-center fs-5">
                             $\tan(\theta) = \frac{y_1}{D}$
                         </div>
                         <p class="small text-muted mb-0">
-                            By measuring the distance format the central maxima to the 1st order spot ($y_1$) and knowing the screen distance ($D$), we calculate $\theta$, which gives the experimental wavelength $\lambda$.
+                            By measuring the distance from the central maxima to the 1st order spot ($y_1$) and knowing the screen distance ($D$), we calculate $\theta$, which gives the experimental wavelength $\lambda$.
                         </p>
                     </div>
 

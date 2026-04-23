@@ -12,25 +12,23 @@
     <link rel="stylesheet" href="../../css/vlabs-theme.css">
 
     <style>
-        body {
-            background-color: #f0f2f5;
-        }
+        body { background-color: #f5f5f5; }
 
-        /* ── Immersive Simulation Container ── */
+        /* ── Simulation Container ── */
         .sim-container {
-            background-color: #0d1117; /* Dark deep space */
+            background-color: #0d0d0d;
             border-radius: 12px;
-            border: 1px solid #30363d;
+            border: 1px solid #333333;
             overflow: hidden;
-            box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.18);
             margin-bottom: 2rem;
         }
 
-        /* Top 2.5D Canvas Area */
+        /* Top Canvas Area */
         .main-canvas-wrap {
             position: relative;
-            background: radial-gradient(circle at 50% 50%, #1a2333 0%, #0d1117 100%);
-            border-bottom: 1px solid #30363d;
+            background: #0d0d0d;
+            border-bottom: 1px solid #333333;
         }
 
         #benchCanvas {
@@ -48,9 +46,9 @@
         }
 
         .btn-laser {
-            background: rgba(13, 17, 23, 0.7);
-            border: 1px solid #30363d;
-            color: #8b949e;
+            background: rgba(15,15,15,0.75);
+            border: 1px solid #444444;
+            color: #999999;
             font-weight: 600;
             padding: 8px 16px;
             border-radius: 6px;
@@ -61,57 +59,51 @@
             transition: all 0.2s;
             backdrop-filter: blur(4px);
         }
-
         .btn-laser:hover {
-            border-color: #8b949e;
-            color: #c9d1d9;
+            border-color: #888888;
+            color: #eeeeee;
         }
-
         .btn-laser.active {
             color: #fff;
-            border-color: #00ff41;
-            box-shadow: 0 0 15px rgba(0,255,65,0.2);
+            border-color: #eeeeee;
+            box-shadow: 0 0 12px rgba(255,255,255,0.15);
         }
 
         .laser-led {
-            width: 12px; 
+            width: 12px;
             height: 12px;
             border-radius: 50%;
-            background: #21262d;
+            background: #333333;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.8);
             transition: 0.3s;
         }
-
         .btn-laser.active .laser-led {
-            background: #00ff41;
-            box-shadow: 0 0 10px #00ff41, inset 0 1px 3px rgba(255,255,255,0.8);
+            background: #eeeeee;
+            box-shadow: 0 0 8px #eeeeee;
         }
 
         /* Bottom Control Deck */
         .bottom-deck {
             padding: 20px;
-            background: #161b22;
+            background: #1a1a1a;
         }
 
         /* Zoom Box */
         .zoom-box {
-            background: #0d1117;
-            border: 1px solid #1f6feb;
+            background: #0d0d0d;
+            border: 1px solid #444444;
             border-radius: 8px;
             padding: 12px;
-            box-shadow: 0 0 15px rgba(31, 111, 235, 0.08); /* slight blue glow */
             height: 100%;
         }
-
         .zoom-title {
-            color: #58a6ff;
+            color: #cccccc;
             font-size: 0.9rem;
             text-align: center;
             margin-bottom: 10px;
             font-weight: bold;
             letter-spacing: 0.5px;
         }
-
         .zoom-canvas-wrap {
             position: relative;
             background: #000;
@@ -120,59 +112,51 @@
             overflow: hidden;
             user-select: none;
         }
-
         #zoomCanvas {
             width: 100%;
             height: 100%;
             display: block;
         }
 
-        /* Ruler / Calipers Overlay */
+        /* Caliper Overlay */
         .caliper-container {
             position: absolute;
-            top: 0;
-            left: 0;
+            top: 0; left: 0;
             width: 100%;
             height: 100%;
-            pointer-events: none; /* Let clicks pass through except on children */
+            pointer-events: none;
         }
-
         .caliper-bar {
             position: absolute;
             top: 30px;
             height: 80px;
             width: 2px;
-            background: yellow;
+            background: #ffffff;
             pointer-events: auto;
             cursor: ew-resize;
-            box-shadow: 0 0 5px yellow;
+            box-shadow: 0 0 5px #ffffff;
         }
-
         .caliper-bar::before {
             content: '';
             position: absolute;
-            top: -10px;
-            left: -10px;
-            right: -10px;
-            bottom: -10px;
+            top: -10px; left: -10px;
+            right: -10px; bottom: -10px;
             background: transparent;
         }
-
         .caliper-connection {
             position: absolute;
             height: 2px;
-            background: yellow;
-            border-top: 1px dashed rgba(255,255,0,0.5);
+            background: #ffffff;
+            border-top: 1px dashed rgba(255,255,255,0.5);
             top: 70px;
             pointer-events: none;
             display: flex;
             justify-content: center;
             align-items: center;
         }
-
         .caliper-beta {
-            color: yellow;
-            background: rgba(0,0,0,0.7);
+            color: #ffffff;
+            background: rgba(0,0,0,0.8);
             padding: 2px 6px;
             border-radius: 4px;
             font-weight: bold;
@@ -181,48 +165,53 @@
             transform: translateY(-15px);
         }
 
-        /* Slider Panel */
+        /* Controls Panel */
         .controls-box {
-            background: #0d1117;
-            border: 1px solid #30363d;
+            background: #0d0d0d;
+            border: 1px solid #333333;
             border-radius: 8px;
             padding: 20px;
             height: 100%;
-            color: #c9d1d9;
+            color: #cccccc;
         }
-
         .controls-box label {
             font-size: 0.85rem;
             font-weight: 600;
-            color: #8b949e;
+            color: #888888;
         }
-
-        .form-range::-webkit-slider-thumb {
-            background: #58a6ff;
-        }
+        .controls-box h6 { color: #eeeeee !important; }
 
         .badge-dark-custom {
-            background: #21262d;
-            border: 1px solid #30363d;
-            color: #c9d1d9;
+            background: #222222;
+            border: 1px solid #444444;
+            color: #cccccc;
         }
 
-        /* Tables & Ref */
-        .table-custom-header {
-            background-color: #1f3c88;
-            color: white;
-        }
-
+        /* Physics ref */
         .physics-ref {
             font-size: 0.85rem;
-            font-family: 'Courier New', monospace;
-            color: #495057;
+            font-family: 'Courier New', Courier, monospace;
+            color: #333333;
             line-height: 1.8;
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
+            background: #f8f8f8;
+            border: 1px solid #cccccc;
             padding: 12px;
             border-radius: 6px;
         }
+
+        /* Table header override inside sim */
+        .table-custom-header {
+            background-color: #111111 !important;
+            color: white !important;
+        }
+
+        /* Sim dark select */
+        .controls-box select.form-select {
+            background-color: #1a1a1a !important;
+            color: #eeeeee !important;
+            border-color: #444444 !important;
+        }
+        .controls-box option { background-color: #1a1a1a; }
     </style>
 </head>
 
@@ -246,23 +235,23 @@
 
         <!-- SIMULATION WORLD -->
         <div class="sim-container">
-            
+
             <!-- 2.5D Render View -->
             <div class="main-canvas-wrap">
-                <!-- Laser Button Override -->
+                <!-- Laser Button -->
                 <div class="overlay-controls">
                     <div class="btn-laser" id="btn-laser" onclick="toggleLaser()">
                         <div class="laser-led"></div>
                         <span id="laser-label">LASER OFF</span>
                     </div>
                 </div>
-                <!-- 3D Optical Bench Render -->
+                <!-- Optical Bench Canvas -->
                 <canvas id="benchCanvas" width="1200" height="400"></canvas>
             </div>
 
             <!-- Bottom Deck -->
             <div class="bottom-deck row g-4 align-items-stretch m-0">
-                
+
                 <!-- Zoomed Measurements -->
                 <div class="col-lg-7 px-2">
                     <div class="zoom-box">
@@ -278,8 +267,8 @@
                                 </div>
                             </div>
                         </div>
-                        <p class="text-center mt-2 mb-0" style="color: #8b949e; font-size: 0.8rem;">
-                            Drag the yellow lines to align with the first-order dark fringes to measure β.
+                        <p class="text-center mt-2 mb-0" style="color: #888888; font-size: 0.8rem;">
+                            Drag the white lines to align with the first-order dark fringes to measure β.
                         </p>
                     </div>
                 </div>
@@ -287,8 +276,8 @@
                 <!-- Parameters Box -->
                 <div class="col-lg-5 px-2">
                     <div class="controls-box">
-                        <h6 class="mb-3 border-bottom border-secondary pb-2" style="color: #e6edf3;">Apparatus Settings</h6>
-                        
+                        <h6 class="mb-3 border-bottom border-secondary pb-2">Apparatus Settings</h6>
+
                         <div class="mb-3">
                             <div class="d-flex justify-content-between mb-1">
                                 <label>Screen Distance D (cm)</label>
@@ -302,13 +291,12 @@
                                 <label>Hair Thickness a (µm)</label>
                                 <span class="badge badge-dark-custom" id="thick-badge">50 µm</span>
                             </div>
-                            <!-- Realistically student doesn't know 'a' in a test, but since it's a sim we let them change it to test scenarios -->
                             <input type="range" id="thickness-slider" class="form-range" min="30" max="120" step="1" value="50">
                         </div>
 
                         <div>
                             <label class="mb-1">Select Laser Wavelength</label>
-                            <select id="lambda-select" class="form-select bg-dark text-light border-secondary">
+                            <select id="lambda-select" class="form-select">
                                 <option value="405">Violet (405 nm)</option>
                                 <option value="532">Green (532 nm)</option>
                                 <option value="633" selected>Red He-Ne (633 nm)</option>
@@ -322,7 +310,7 @@
 
         <!-- DATA & PHYSICS REF ROW -->
         <div class="row g-4 align-items-start">
-            
+
             <div class="col-lg-7">
                 <div class="card shadow-sm border-0 p-3">
                     <h5 class="fw-bold mb-3 text-center border-bottom pb-2">Observations (from Zoomed UI)</h5>
@@ -354,7 +342,7 @@
                                 <button id="clear-data" class="btn btn-outline-danger btn-sm w-100">Clear Table</button>
                             </div>
                             <div class="col-6">
-                                <button id="download-pdf" class="btn btn-danger btn-sm w-100 text-white fw-bold">Download PDF</button>
+                                <button id="download-pdf" class="btn btn-danger btn-sm w-100 fw-bold">Download PDF</button>
                             </div>
                         </div>
                         <button onclick="calcResult()" class="btn btn-success btn-lg mt-1 fw-bold">
@@ -381,7 +369,7 @@
                         <strong>a = (2 · λ · D) / β</strong>
                     </div>
 
-                    <div class="alert alert-info py-2" style="font-size: 0.85rem;">
+                    <div class="alert alert-info py-2" style="font-size: 0.85rem; background:#f0f0f0 !important; border-color:#cccccc !important; color:#111 !important;">
                         <strong>Instructions:</strong> Use the zoomed ruler to measure <strong>β</strong> (the distance between the two first-order dark fringes bounding the central bright spot).
                     </div>
                 </div>

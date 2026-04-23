@@ -508,18 +508,12 @@ addReadingBtn.addEventListener("click", () => {
 function renderTable() {
     obsBody.innerHTML = '';
     observations.forEach((o, i) => {
-        let clr = getWavelengthColor(o.lambda);
-        let colorStr = `rgb(${clr.r}, ${clr.g}, ${clr.b})`;
-        if (o.lambda < 400) colorStr = '#e288e5'; // Highlight UV nicely
-        if (o.lambda > 650) colorStr = '#ff4d4d';
-        
         let tr = document.createElement('tr');
-        // Match the style of the user's reference table
         tr.innerHTML = `
-            <td style="color:#a0b2d6">${i+1}</td>
-            <td style="color:#a0b2d6">${o.lambda}</td>
-            <td style="color:#a0b2d6">${o.freq.toFixed(2)}</td>
-            <td style="color:${colorStr}; font-weight:bold;">${Math.abs(o.v0).toFixed(2)}</td>
+            <td>${i+1}</td>
+            <td>${o.lambda}</td>
+            <td>${o.freq.toFixed(2)}</td>
+            <td class="fw-bold">${Math.abs(o.v0).toFixed(2)}</td>
         `;
         obsBody.appendChild(tr);
     });
@@ -530,23 +524,24 @@ function drawGraph() {
     if(!graphCtx) return;
     const W = graphCanvas.width;
     const H = graphCanvas.height;
-    
+
+    // White canvas background
     graphCtx.clearRect(0,0,W,H);
+    graphCtx.fillStyle = '#ffffff';
+    graphCtx.fillRect(0,0,W,H);
 
     // Padding
-    const pLeft = 40;
-    const pRight = 20;
-    const pTop = 20;
-    const pBot = 40;
-    
-    // Axes (Fixed to show standard range)
-    let minX = 4;
-    let maxX = 12;
-    let minY = -0.5; // allow small negative for visual buffer
-    let maxY = 4.0;
+    const pLeft = 48;
+    const pRight = 24;
+    const pTop = 24;
+    const pBot = 44;
 
-    // Grid lines
-    graphCtx.strokeStyle = "#1a233a";
+    // Fixed axis ranges
+    const minX = 4, maxX = 12;
+    const minY = -0.5, maxY = 4.0;
+
+    // ── Grid lines (light grey) ──
+    graphCtx.strokeStyle = 'rgba(0,0,0,0.10)';
     graphCtx.lineWidth = 1;
     graphCtx.beginPath();
     for (let x = minX; x <= maxX; x++) {
@@ -561,79 +556,78 @@ function drawGraph() {
     }
     graphCtx.stroke();
 
-    // Axes lines
-    graphCtx.strokeStyle = "#6482b9";
-    graphCtx.lineWidth = 1.5;
-    graphCtx.beginPath();
-    // X axis 
+    // ── Axes (solid black) ──
     let yZero = H - pBot - ((0 - minY) / (maxY - minY)) * (H - pBot - pTop);
-    graphCtx.moveTo(pLeft, yZero);
-    graphCtx.lineTo(W - pRight, yZero);
-    // Y axis 
-    graphCtx.moveTo(pLeft, pTop);
-    graphCtx.lineTo(pLeft, H - pBot);
+    graphCtx.strokeStyle = '#111111';
+    graphCtx.lineWidth = 1.8;
+    graphCtx.beginPath();
+    graphCtx.moveTo(pLeft, yZero); graphCtx.lineTo(W - pRight, yZero); // X axis
+    graphCtx.moveTo(pLeft, pTop);  graphCtx.lineTo(pLeft, H - pBot);   // Y axis
     graphCtx.stroke();
 
-    // Text labels
-    graphCtx.fillStyle = "#6482b9";
-    graphCtx.font = "11px sans-serif";
-    graphCtx.textAlign = "center";
-    graphCtx.textBaseline = "top";
-    for (let x = minX; x <= maxX; x += 1) {
+    // ── Axis tick labels ──
+    graphCtx.fillStyle = '#333333';
+    graphCtx.font = "11px 'Courier New', monospace";
+    graphCtx.textAlign = 'center';
+    graphCtx.textBaseline = 'top';
+    for (let x = minX; x <= maxX; x++) {
         let px = pLeft + ((x - minX) / (maxX - minX)) * (W - pLeft - pRight);
-        if(x > minX) graphCtx.fillText(x, px, yZero + 5);
+        if (x > minX) graphCtx.fillText(x, px, yZero + 6);
     }
-    graphCtx.textAlign = "right";
-    graphCtx.textBaseline = "middle";
-    for (let y = 0; y <= maxY; y += 1) {
+    graphCtx.textAlign = 'right';
+    graphCtx.textBaseline = 'middle';
+    for (let y = 0; y <= maxY; y++) {
         let py = H - pBot - ((y - minY) / (maxY - minY)) * (H - pBot - pTop);
         graphCtx.fillText(y.toFixed(1), pLeft - 8, py);
     }
 
-    graphCtx.fillText("v (10¹⁴ Hz)", W - 5, yZero + 15);
-    graphCtx.fillText("V₀", pLeft - 10, pTop - 10);
-    
-    // Draw regression line if at least 2 points
+    // Axis titles
+    graphCtx.fillStyle = '#111111';
+    graphCtx.font = "11px 'Courier New', monospace";
+    graphCtx.textAlign = 'center';
+    graphCtx.textBaseline = 'top';
+    graphCtx.fillText('ν (×10¹⁴ Hz)', pLeft + (W - pLeft - pRight) / 2, H - pBot + 14);
+    graphCtx.save();
+    graphCtx.translate(14, pTop + (H - pTop - pBot) / 2);
+    graphCtx.rotate(-Math.PI / 2);
+    graphCtx.fillText('V₀ (V)', 0, 0);
+    graphCtx.restore();
+
+    // ── Best-fit line (black dashed) ──
     let n = observations.length;
-    if(n >= 2) {
+    if (n >= 2) {
         let sumX=0, sumY=0, sumXY=0, sumXX=0;
         observations.forEach(o => {
-            let x = o.freq; let y = Math.abs(o.v0);
+            let x = o.freq, y = Math.abs(o.v0);
             sumX += x; sumY += y; sumXY += x*y; sumXX += x*x;
         });
         let den = n*sumXX - sumX*sumX;
-        if(den !== 0) {
+        if (den !== 0) {
             let m = (n*sumXY - sumX*sumY) / den;
             let intercept = (sumY - m*sumX) / n;
-
             let py1 = H - pBot - (((m*minX + intercept) - minY) / (maxY - minY)) * (H - pBot - pTop);
             let py2 = H - pBot - (((m*maxX + intercept) - minY) / (maxY - minY)) * (H - pBot - pTop);
-            
-            graphCtx.strokeStyle = "#00ff41"; // Green line
+            graphCtx.strokeStyle = '#111111';
             graphCtx.lineWidth = 2;
+            graphCtx.setLineDash([6, 4]);
             graphCtx.beginPath();
             graphCtx.moveTo(pLeft, py1);
             graphCtx.lineTo(W - pRight, py2);
             graphCtx.stroke();
+            graphCtx.setLineDash([]);
         }
     }
 
-    // Draw Points
+    // ── Data points (black fill, white stroke) ──
     observations.forEach(o => {
         let px = pLeft + ((o.freq - minX) / (maxX - minX)) * (W - pLeft - pRight);
-        let y_val = Math.abs(o.v0);
-        let py = H - pBot - ((y_val - minY) / (maxY - minY)) * (H - pBot - pTop);
-        
-        let clr = getWavelengthColor(o.lambda);
-        let colorStr = `rgb(${clr.r}, ${clr.g}, ${clr.b})`;
-        if (o.lambda < 400) colorStr = '#e288e5'; 
-
-        graphCtx.fillStyle = colorStr;
+        let py = H - pBot - ((Math.abs(o.v0) - minY) / (maxY - minY)) * (H - pBot - pTop);
+        graphCtx.fillStyle = '#111111';
         graphCtx.beginPath();
         graphCtx.arc(px, py, 5, 0, Math.PI*2);
         graphCtx.fill();
-        graphCtx.strokeStyle = "#fff";
-        graphCtx.lineWidth = 1;
+        graphCtx.strokeStyle = '#ffffff';
+        graphCtx.lineWidth = 1.5;
         graphCtx.stroke();
     });
 }

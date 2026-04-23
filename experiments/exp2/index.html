@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exp: Heisenberg Uncertainty Principle</title>
+    <title>Exp 2: Heisenberg Uncertainty Principle | Virtual Lab</title>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
@@ -16,19 +16,20 @@
     <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <link rel="stylesheet" href="../../css/vlabs-theme.css">
 
     <style>
         body {
-            background-color: #f8f9fa;
-            color: #333;
+            background-color: #f5f5f5;
+            color: #111111;
         }
 
-        /* ── Canvas Wrap matching exp4 ── */
+        /* ── Canvas Wrap ── */
         .bench-canvas-wrap {
-            background: #0a0e14;
-            border-radius: 6px;
+            background: #0d0d0d;
+            border-radius: 8px;
             padding: 15px;
-            border: 1px solid #dee2e6;
+            border: 1px solid #333333;
             margin-bottom: 20px;
         }
 
@@ -36,7 +37,7 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            color: #00ff41;
+            color: #cccccc;
             font-size: 0.85rem;
             font-weight: 600;
             margin-bottom: 15px;
@@ -45,21 +46,22 @@
         .status-led {
             width: 8px; height: 8px;
             border-radius: 50%;
-            background: #00ff41;
-            box-shadow: 0 0 6px #00ff41;
+            background: #cccccc;
+            box-shadow: 0 0 6px #cccccc;
         }
 
-        /* Canvas Headers in Dark Wrap */
+        /* Canvas title labels inside dark wrap */
         .canvas-title {
             text-align: center;
             font-weight: bold;
-            font-size: 1.1rem;
-            margin-bottom: 10px;
+            font-size: 1rem;
+            margin-bottom: 8px;
+            color: #cccccc;
         }
 
-        .canvas-title .span:first-child { color: black; }
-        .canvas-title .purple-text { color: #d05ce3; }
-        .canvas-title .blue-text { color: #5c9ce3; }
+        .canvas-title span:first-child { color: #cccccc; }
+        .canvas-title .purple-text    { color: #dddddd; }
+        .canvas-title .blue-text      { color: #eeeeee; }
 
         .ft-arrow-container {
             text-align: center;
@@ -72,7 +74,7 @@
         }
 
         .ft-text {
-            color: #a872e8;
+            color: #bbbbbb;
             font-size: 0.9rem;
             font-weight: bold;
             margin-bottom: 4px;
@@ -81,7 +83,7 @@
         .ft-arrow {
             width: 60px;
             height: 4px;
-            background: linear-gradient(90deg, #4b3687, #a872e8);
+            background: linear-gradient(90deg, #555555, #aaaaaa);
             position: relative;
         }
         .ft-arrow::after {
@@ -90,35 +92,33 @@
             right: -8px; top: -6px;
             border-top: 8px solid transparent;
             border-bottom: 8px solid transparent;
-            border-left: 10px solid #a872e8;
+            border-left: 10px solid #aaaaaa;
         }
 
-        /* ── Live readout strip matching exp4 ── */
+        /* ── Live readout strip ── */
         .readout-strip {
             display: flex;
-            border: 1px solid #dee2e6;
+            border: 1px solid #cccccc;
             border-radius: 6px;
             overflow: hidden;
-            background: #fff;
+            background: #f0f0f0;
             margin-bottom: 20px;
         }
 
         .readout-item {
             flex: 1;
             padding: 0.55rem 1rem;
-            border-right: 1px solid #dee2e6;
+            border-right: 1px solid #cccccc;
             text-align: center;
         }
 
-        .readout-item:last-child {
-            border-right: none;
-        }
+        .readout-item:last-child { border-right: none; }
 
         .readout-label {
             font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: #6c757d;
+            color: #555555;
             font-weight: bold;
         }
 
@@ -126,19 +126,18 @@
             font-size: 1.2rem;
             font-weight: 600;
             font-family: 'Courier New', monospace;
+            color: #111111;
         }
 
-        .val-purple { color: #d05ce3; }
-        .val-blue { color: #5ca4e3; }
-        .val-yellow { color: #e3bc5c; }
-        .val-green { color: #28a745; }
+        /* All colored readout values → black */
+        .val-purple, .val-blue, .val-yellow, .val-green { color: #111111 !important; }
 
-        /* Tables & Graph Wrap */
+        /* ── Graph wrap (dark bg for canvas) ── */
         .graph-wrap {
-            background: #0a0e14;
+            background: #0d0d0d;
             border-radius: 6px;
             padding: 15px;
-            border: 1px solid #dee2e6;
+            border: 1px solid #333333;
         }
 
         #obs-table th,
@@ -148,90 +147,46 @@
             vertical-align: middle;
         }
 
-        .canvas-title span:first-child { color: white; }
-        .canvas-title .purple-text { color: #d05ce3; }
-        .canvas-title .blue-text { color: #5c9ce3; }
-
-        .ft-arrow-container {
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
-        }
-
-        .ft-text {
-            color: #a872e8;
-            font-size: 0.9rem;
-            font-weight: bold;
-            margin-bottom: 4px;
-        }
-
-        .ft-arrow {
-            width: 60px;
-            height: 4px;
-            background: linear-gradient(90deg, #4b3687, #a872e8);
-            position: relative;
-        }
-        .ft-arrow::after {
-            content: '';
-            position: absolute;
-            right: -8px; top: -6px;
-            border-top: 8px solid transparent;
-            border-bottom: 8px solid transparent;
-            border-left: 10px solid #a872e8;
-        }
-
-        /* Readout Boxes */
+        /* ── Readout Boxes (alternative layout) ── */
         .readout-box {
-            background: #0a0e17;
-            border: 1px solid #1f2937;
+            background: #f0f0f0;
+            border: 1px solid #cccccc;
             border-radius: 8px;
             padding: 15px 10px;
             text-align: center;
             height: 100%;
         }
-        
-        .r-title { font-size: 0.8rem; color: #9ca3af; margin-bottom: 5px; }
-        .r-val { font-size: 1.3rem; font-weight: bold; }
-        
-        .val-purple { color: #d05ce3; }
-        .val-blue { color: #5ca4e3; }
-        .val-yellow { color: #e3bc5c; }
-        .val-green { color: #5ce375; }
+        .r-title { font-size: 0.8rem; color: #555555; margin-bottom: 5px; }
+        .r-val   { font-size: 1.3rem; font-weight: bold; color: #111111; }
 
-        /* Sliders */
+        /* ── Sliders control panel ── */
         .control-panel {
-            background: #0a0f1a;
-            border: 1px solid #1f2a40;
+            background: #f0f0f0;
+            border: 1px solid #cccccc;
             border-radius: 8px;
             padding: 20px;
             margin-bottom: 20px;
         }
-        .form-range::-webkit-slider-thumb { background: #5ca4e3; }
 
-        /* Tables & Bottom Area */
+        /* ── Table styles ── */
         .table-dark-custom {
-            background-color: #0b1120;
-            color: #a0b2d6;
-            border: 1px solid #1a233a;
+            background-color: #111111;
+            color: #eeeeee;
+            border: 1px solid #333333;
         }
         .table-dark-custom th {
-            background-color: #111a2f;
-            border-bottom: 1px solid #1a233a;
-            color: #a0b2d6;
-            font-weight: normal;
+            background-color: #1a1a1a;
+            border-bottom: 1px solid #333333;
+            color: #eeeeee;
+            font-weight: 600;
         }
         .table-dark-custom td {
-            border-color: #1a233a;
+            border-color: #333333;
             vertical-align: middle;
         }
-        .result-pass { color: #5ce375; font-weight: bold; }
-        .result-fail { color: #e35c5c; font-weight: bold; }
-
+        .result-pass { color: #111111; font-weight: bold; }
+        .result-fail { color: #555555; font-weight: bold; }
     </style>
-    <link rel="stylesheet" href="../../css/vlabs-theme.css">
 </head>
 
 <body class="bg-light">
@@ -239,7 +194,7 @@
     <!-- NAVBAR -->
     <nav class="navbar navbar-dark bg-dark shadow-sm mb-4">
         <div class="container-fluid px-4">
-            <span class="navbar-brand mb-0 h1 fw-bold text-white">PICT Quantum Physics Virtual Lab</span>
+            <span class="navbar-brand mb-0 h1 fw-bold text-white">PICT Physics Virtual Lab</span>
             <a href="../../index.html" class="btn btn-outline-light btn-sm fw-bold">Home Page</a>
         </div>
     </nav>
@@ -293,7 +248,7 @@
                 </div>
             </div>
 
-            <!-- Light Theme Readout Strip -->
+            <!-- Readout Strip -->
             <div class="readout-strip">
                 <div class="readout-item">
                     <div class="readout-label">Position Uncertainty (Δx)</div>
@@ -307,8 +262,8 @@
                     <div class="readout-label">Product (Δx · Δp)</div>
                     <div class="readout-value val-yellow"><span id="val-prod">0.00</span> <span style="font-size:0.8rem">J·s</span></div>
                 </div>
-                <div class="readout-item bg-light">
-                    <div class="readout-label text-success">Theoretical Limit ℏ/2</div>
+                <div class="readout-item bg-white">
+                    <div class="readout-label">Theoretical Limit ℏ/2</div>
                     <div class="readout-value val-green">5.27 × 10⁻³⁵ <span style="font-size:0.8rem">J·s</span></div>
                 </div>
             </div>
@@ -338,13 +293,13 @@
 
         <!-- BOTTOM AREA: Graph & Table -->
         <div class="row g-4 align-items-stretch">
-            
+
             <div class="col-lg-5">
                 <div class="card shadow-sm border-0 p-3 h-100 d-flex flex-column">
                     <h5 class="text-center border-bottom pb-2 mb-3 fw-bold">Uncertainty Product Graph</h5>
-                    
+
                     <div class="graph-wrap flex-grow-1 d-flex flex-column justify-content-center align-items-center">
-                        <h6 class="text-light mb-2">Uncertainty Product vs Initial Width (Δx)</h6>
+                        <h6 class="text-light mb-2" style="color:#cccccc !important;">Uncertainty Product vs Initial Width (Δx)</h6>
                         <canvas id="productGraphCanvas" width="400" height="280" style="width:100%; border-radius: 4px;"></canvas>
                     </div>
                 </div>
@@ -353,7 +308,7 @@
             <div class="col-lg-7">
                 <div class="card shadow-sm border-0 p-3 h-100 d-flex flex-column">
                     <h5 class="text-center border-bottom pb-2 mb-3 fw-bold">Observation Table</h5>
-                    
+
                     <div class="table-responsive flex-grow-1">
                         <table class="table table-hover text-center align-middle mb-0" id="obs-table">
                             <thead class="table-dark">
@@ -369,7 +324,7 @@
                             <tbody id="obs-body"></tbody>
                         </table>
                     </div>
-                    
+
                     <p id="empty-hint" class="text-center text-muted small mt-3 mb-0" style="display:none;">
                         No readings recorded yet. Adjust slider and click <strong>Record Frame</strong>.
                     </p>

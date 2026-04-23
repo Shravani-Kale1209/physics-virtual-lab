@@ -17,25 +17,23 @@
     <link rel="stylesheet" href="../../css/vlabs-theme.css">
 
     <style>
-        body {
-            background-color: #f0f2f5;
-        }
+        body { background-color: #f5f5f5; }
 
-        /* ── Immersive Simulation Container ── */
+        /* ── Simulation Container ── */
         .sim-container {
-            background-color: #3b423d; /* Matching the greenish-gray from the reference */
+            background-color: #0d0d0d;
             border-radius: 12px;
-            border: 1px solid #1f2320;
+            border: 1px solid #333333;
             overflow: hidden;
-            box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.18);
             margin-bottom: 2rem;
             position: relative;
         }
 
         .main-canvas-wrap {
             position: relative;
-            background: linear-gradient(180deg, #444c46 0%, #353a36 60%, #1e201f 100%);
-            border-bottom: 1px solid #282d2a;
+            background: #0d0d0d;
+            border-bottom: 1px solid #333333;
         }
 
         #peCanvas {
@@ -47,84 +45,90 @@
         /* Overlay Status */
         .experiment-status {
             position: absolute;
-            top: 20px;
-            right: 25px;
+            top: 16px;
+            right: 20px;
             z-index: 10;
-            background: rgba(30, 40, 35, 0.7);
-            border: 1px solid #2e3631;
-            color: #00ff41;
+            background: rgba(20,20,20,0.75);
+            border: 1px solid #444444;
+            color: #eeeeee;
             font-weight: 600;
-            padding: 8px 16px;
+            padding: 6px 14px;
             border-radius: 6px;
             display: inline-flex;
             align-items: center;
             gap: 10px;
             backdrop-filter: blur(4px);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         .status-led {
-            width: 10px; 
+            width: 10px;
             height: 10px;
             border-radius: 50%;
-            background: #00ff41;
-            box-shadow: 0 0 8px #00ff41, inset 0 1px 3px rgba(255,255,255,0.8);
+            background: #cccccc;
+            box-shadow: 0 0 6px #cccccc;
         }
 
         /* Bottom Deck */
         .bottom-deck {
             padding: 20px;
-            background: #1a1e1b;
+            background: #1a1a1a;
         }
 
         .controls-box {
-            background: #232825;
-            border: 1px solid #363b38;
+            background: #222222;
+            border: 1px solid #333333;
             border-radius: 8px;
             padding: 20px;
             height: 100%;
-            color: #d8e0da;
+            color: #dddddd;
         }
 
         .controls-box label {
             font-size: 0.85rem;
             font-weight: 600;
-            color: #aebdb7;
+            color: #aaaaaa;
         }
 
-        .form-range::-webkit-slider-thumb {
-            background: #58a6ff;
-        }
-
-        .form-range::-webkit-slider-runnable-track {
-            background: #6a7178;
+        .controls-box h6 {
+            color: #eeeeee !important;
         }
 
         .badge-dark-custom {
-            background: #1a1e1b;
-            border: 1px solid #363b38;
-            color: #d8e0da;
+            background: #111111;
+            border: 1px solid #444444;
+            color: #eeeeee;
             font-family: 'Courier New', Courier, monospace;
             font-size: 0.85rem;
         }
 
         .instruction-bar {
-            background: #202422;
-            color: #aebdb7;
+            background: #1e1e1e;
+            color: #aaaaaa;
             padding: 12px 20px;
             border-radius: 8px;
             font-size: 0.9rem;
-            border: 1px solid #363b38;
+            border: 1px solid #333333;
         }
 
-        .table-custom-header {
-            background-color: #1f3c88;
-            color: white;
+        /* Graph card — dark bg */
+        .graph-card {
+            background-color: #111111 !important;
+            border: 1px solid #333333 !important;
+        }
+        .graph-card .card-header-title {
+            color: #eeeeee;
+            font-weight: 600;
+            font-size: 0.95rem;
         }
 
-        option {
-            background-color: #1a1e1b;
+        /* Retain dark select inside sim */
+        .sim-container select.form-select {
+            background-color: #1a1a1a !important;
+            color: #eeeeee !important;
+            border-color: #444444 !important;
         }
+        .sim-container option { background-color: #1a1a1a; }
     </style>
 </head>
 
@@ -139,6 +143,7 @@
     </nav>
 
     <div class="container-fluid px-4 mb-5">
+        <!-- PAGE TITLE -->
         <div class="text-center mb-4">
             <h3 class="fw-bold text-dark mb-0">Determination of Planck's Constant</h3>
             <p class="text-muted small">Using the Photoelectric Effect</p>
@@ -146,7 +151,7 @@
 
         <!-- SIMULATION WORLD -->
         <div class="sim-container">
-            <!-- 2.5D Render View -->
+            <!-- Canvas View -->
             <div class="main-canvas-wrap">
                 <div class="experiment-status">
                     <div class="status-led"></div>
@@ -161,12 +166,12 @@
                     <!-- Instructions -->
                     <div class="col-lg-12">
                         <div class="instruction-bar">
-                            Vary the retarding potential using the slider. Adjust it until the simulated photocurrent (blue electrons) completely stops reaching the anode.
+                            Vary the retarding potential using the slider. Adjust it until the simulated photocurrent (electrons) completely stops reaching the anode.
                             The corresponding potential magnitude is the stopping potential ($V_0$). Record this and repeat for different wavelengths.
                         </div>
                     </div>
 
-                    <!-- Parameter Controls -->
+                    <!-- Light Source Controls -->
                     <div class="col-lg-4">
                         <div class="controls-box">
                             <h6 class="mb-3 border-bottom border-secondary pb-2">Light Source</h6>
@@ -184,31 +189,31 @@
                         </div>
                     </div>
 
+                    <!-- Vacuum Tube -->
                     <div class="col-lg-4">
                         <div class="controls-box">
                             <h6 class="mb-3 border-bottom border-secondary pb-2">Vacuum Tube Setup</h6>
                             <div>
                                 <label class="mb-1">Photosensitive Cathode Material</label>
-                                <select id="material-select" class="form-select bg-dark text-light border-secondary">
+                                <select id="material-select" class="form-select">
                                     <option value="2.28">Sodium (Na) - Φ: 2.28 eV</option>
                                     <option value="2.30">Potassium (K) - Φ: 2.30 eV</option>
                                     <option value="4.08">Aluminum (Al) - Φ: 4.08 eV</option>
                                     <option value="4.31">Zinc (Zn) - Φ: 4.31 eV</option>
                                 </select>
                             </div>
-                            <!-- Voltmeter status is built into the canvas visually, providing immersion -->
                         </div>
                     </div>
 
+                    <!-- Retarding Potential -->
                     <div class="col-lg-4">
-                        <div class="controls-box" style="border-color: #d18731;">
-                            <h6 class="mb-3 border-bottom border-secondary pb-2" style="color: #d18731;">Retarding Potential Box</h6>
+                        <div class="controls-box" style="border-color: #555555;">
+                            <h6 class="mb-3 border-bottom border-secondary pb-2">Retarding Potential Box</h6>
                             <div class="mb-3">
                                 <div class="d-flex justify-content-between mb-1">
                                     <label>Applied Potential (V)</label>
                                     <span class="badge badge-dark-custom" id="volt-badge">0.00 V</span>
                                 </div>
-                                <!-- Typically retarding potential is negative -->
                                 <input type="range" id="volt-slider" class="form-range" min="-5.00" max="0.00" step="0.01" value="0.00">
                                 <div class="text-end mt-1">
                                     <button class="btn btn-sm btn-outline-warning" id="fine-tune-down">-0.01V</button>
@@ -217,20 +222,19 @@
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
 
-        <!-- OBSERVATIONS & GRAPH -->
+        <!-- OBSERVATIONS & GRAPH ROW -->
         <div class="row g-4 mb-4">
             <!-- GRAPH PANEL -->
             <div class="col-lg-6">
-                <div class="card shadow-sm border-0 h-100" style="background-color: #0b1120; border: 1px solid #1a233a !important;">
+                <div class="card shadow-sm h-100 graph-card">
                     <div class="card-header text-center border-bottom-0 pt-3" style="background-color: transparent;">
-                        <h6 class="fw-bold mb-0" style="color: #6482b9;">V₀ vs Frequency (ν) Graph</h6>
+                        <span class="graph-card-title" style="color:#eeeeee; font-weight:600; font-size:0.95rem;">V₀ vs Frequency (ν) Graph</span>
                     </div>
-                    <div class="card-body p-3 d-flex align-items-center justify-content-center">
+                    <div class="card-body p-3 d-flex align-items-center justify-content-center" style="background:#111111;">
                         <canvas id="graphCanvas" width="500" height="350"></canvas>
                     </div>
                 </div>
@@ -238,28 +242,28 @@
 
             <!-- TABLE PANEL -->
             <div class="col-lg-6">
-                <div class="card shadow-sm border-0 h-100" style="background-color: #0b1120; border: 1px solid #1a233a !important;">
-                    <div class="card-header text-center border-bottom-0 pt-3" style="background-color: transparent; border-bottom: 1px solid #1a233a !important;">
-                        <h6 class="fw-bold mb-0" style="color: #6482b9;">Observation Table</h6>
+                <div class="card shadow-sm h-100 graph-card">
+                    <div class="card-header text-center border-bottom-0 pt-3" style="background-color: transparent; border-bottom: 1px solid #333 !important;">
+                        <span style="color:#eeeeee; font-weight:600; font-size:0.95rem;">Observation Table</span>
                     </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
-                            <table id="obs-table" class="table table-hover text-center align-middle mb-0 table-dark" style="background-color: #0b1120;">
-                                <thead style="background-color: #111a2f;">
+                    <div class="card-body p-0" style="background:#111111;">
+                        <div class="table-responsive" style="max-height: 260px; overflow-y: auto;">
+                            <table id="obs-table" class="table table-hover text-center align-middle mb-0" style="background-color:#111111; color:#dddddd;">
+                                <thead class="table-dark">
                                     <tr>
-                                        <th style="color: #a0b2d6; font-weight: normal; font-size: 0.9rem;">Sl.<br>No.</th>
-                                        <th style="color: #a0b2d6; font-weight: normal; font-size: 0.9rem;">Wavelength<br>λ (nm)</th>
-                                        <th style="color: #a0b2d6; font-weight: normal; font-size: 0.9rem;">Frequency<br>ν (× 10¹⁴ Hz)</th>
-                                        <th style="color: #a0b2d6; font-weight: normal; font-size: 0.9rem;">Stopping Potential<br>V₀ (V)</th>
+                                        <th>Sl.<br>No.</th>
+                                        <th>Wavelength<br>λ (nm)</th>
+                                        <th>Frequency<br>ν (× 10¹⁴ Hz)</th>
+                                        <th>Stopping Potential<br>V₀ (V)</th>
                                     </tr>
                                 </thead>
                                 <tbody id="obs-body" style="border-top: none;"></tbody>
                             </table>
                         </div>
                     </div>
-                    <div class="card-footer bg-transparent border-top-0 pb-3 text-center">
-                        <button id="add-reading" class="btn btn-sm px-4" style="background-color: #1a365d; color: #a0b2d6; border: 1px solid #2a4a7f;">
-                            <i class="bi bi-graph-up-arrow"></i> Add to Graph
+                    <div class="card-footer border-top-0 pb-3 text-center" style="background:#111111;">
+                        <button id="add-reading" class="btn btn-primary btn-sm px-4 fw-bold">
+                            Add to Graph
                         </button>
                     </div>
                 </div>
@@ -268,7 +272,6 @@
 
         <!-- ACTIONS & PHYSICS REFERENCE -->
         <div class="row g-4 mt-2">
-            <!-- Buttons & Physics details -->
             <div class="col-lg-12">
                 <div class="card shadow-sm border-0 p-3">
                     <div class="row align-items-center">
@@ -283,7 +286,7 @@
                                         <button id="clear-data" class="btn btn-outline-danger w-100">Clear Data</button>
                                     </div>
                                     <div class="col-6">
-                                        <button id="download-pdf" class="btn btn-dark w-100">Download Report PDF</button>
+                                        <button id="download-pdf" class="btn btn-danger w-100">Download Report PDF</button>
                                     </div>
                                 </div>
                             </div>
@@ -293,7 +296,7 @@
                             <span class="fs-5 d-block text-center mt-2 mb-2">$$eV_0 = h\nu - \Phi$$</span>
                             <div class="text-muted small">
                                 The graph plots $V_0$ on the Y-axis and $\nu$ on the X-axis. This forms a straight line equation $y = mx + c$, where the slope $m = h/e$.<br>
-                                Calculate slope $m$ from the drawn green line to find $h = m \cdot e$.
+                                Calculate slope $m$ from the drawn line to find $h = m \cdot e$.
                             </div>
                         </div>
                     </div>

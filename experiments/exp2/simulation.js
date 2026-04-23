@@ -34,15 +34,18 @@ function formatSciText(num) {
     return `${mantissa.toFixed(2)} x 10^${exp}`;
 }
 
-// Global drawing configurations
+// Global drawing configurations — B&W palette
 const THEME = {
-    bg: "#06090e",
-    grid: "#1a233a",
-    purple: "#d05ce3",
-    blue: "#5c9ce3",
-    yellow: "#e3bc5c",
-    green: "#5ce375",
-    textAxis: "#6482b9"
+    bg:       "#06090e",
+    grid:     "rgba(255,255,255,0.10)",
+    wave1:    "#cccccc",
+    wave2:    "#eeeeee",
+    bracket:  "#888888",
+    line:     "#111111",
+    limitLine:"#555555",
+    dot:      "#111111",
+    dotStroke:"#ffffff",
+    textAxis: "rgba(255,255,255,0.6)"
 };
 
 // ─── RENDERING LOGIC ───
@@ -61,8 +64,8 @@ function drawGrid(ctx, W, H, hLines, vLines) {
     }
     ctx.stroke();
 
-    // Central Axes
-    ctx.strokeStyle = "#273b5c";
+    // Central Axes (slightly brighter white)
+    ctx.strokeStyle = "rgba(255,255,255,0.30)";
     ctx.lineWidth = 1.5;
     ctx.beginPath();
     ctx.moveTo(W/2, 0); ctx.lineTo(W/2, H);
@@ -124,13 +127,11 @@ function renderRealSpace(dx) {
         else ctx.lineTo(px, py);
     }
     
-    ctx.strokeStyle = THEME.purple;
+    ctx.strokeStyle = THEME.wave1;
     ctx.lineWidth = 2.5;
-    ctx.shadowColor = THEME.purple;
-    ctx.shadowBlur = 10;
+    ctx.shadowColor = THEME.wave1;
+    ctx.shadowBlur = 8;
     ctx.stroke();
-    
-    // Disable shadow for UI
     ctx.shadowBlur = 0;
 
     // Draw Width lines (spanning -sigma to +sigma)
@@ -138,17 +139,16 @@ function renderRealSpace(dx) {
     let pLeft = (left_x - minX)/(maxX - minX) * W;
     let pRight = (right_x - minX)/(maxX - minX) * W;
 
-    // Calculate exact visual height of the envelope at these bounds (1 standard deviation = e^-0.5)
+    // Height of envelope at 1 standard deviation
     let env_point = Math.exp(-0.5);
     let env_y = H/2 - (env_point * (H/2.5));
-    // Provide a small gap above the envelope for the dotted lines
-    let bracket_y = env_y - 25; 
+    let bracket_y = env_y - 25;
 
-    ctx.strokeStyle = THEME.yellow;
+    // Measurement bracket lines
+    ctx.strokeStyle = THEME.bracket;
     ctx.lineWidth = 1.5;
     ctx.setLineDash([4, 4]);
     ctx.beginPath();
-    // Vertical drop lines stopping exactly at the envelope
     ctx.moveTo(pLeft, bracket_y); ctx.lineTo(pLeft, env_y - 2);
     ctx.moveTo(pRight, bracket_y); ctx.lineTo(pRight, env_y - 2);
     ctx.stroke();
@@ -157,20 +157,17 @@ function renderRealSpace(dx) {
     ctx.beginPath();
     ctx.moveTo(pLeft, bracket_y); ctx.lineTo(pRight, bracket_y);
     ctx.stroke();
-    
+
     // Arrows pointing outwards
     ctx.setLineDash([]);
-    ctx.fillStyle = THEME.yellow;
+    ctx.fillStyle = THEME.bracket;
     ctx.beginPath(); ctx.moveTo(pLeft, bracket_y); ctx.lineTo(pLeft+6, bracket_y-4); ctx.lineTo(pLeft+6, bracket_y+4); ctx.fill();
     ctx.beginPath(); ctx.moveTo(pRight, bracket_y); ctx.lineTo(pRight-6, bracket_y-4); ctx.lineTo(pRight-6, bracket_y+4); ctx.fill();
 
+    ctx.fillStyle = '#cccccc';
     ctx.textAlign = "center";
     ctx.font = "bold 13px Arial";
-    // Minor shadow for better visibility
-    ctx.shadowColor = "#000";
-    ctx.shadowBlur = 4;
     ctx.fillText("Δx", W/2, bracket_y - 8);
-    ctx.shadowBlur = 0;
 
     // Axis labels
     ctx.fillStyle = THEME.textAxis;
@@ -205,21 +202,20 @@ function renderMomentumSpace(dp) {
         else ctx.lineTo(px, py);
     }
     
-    ctx.strokeStyle = THEME.blue;
+    ctx.strokeStyle = THEME.wave2;
     ctx.lineWidth = 2.5;
-    ctx.shadowColor = THEME.blue;
-    ctx.shadowBlur = 10;
+    ctx.shadowColor = THEME.wave2;
+    ctx.shadowBlur = 8;
     ctx.stroke();
-    
     ctx.shadowBlur = 0;
 
     // Width lines for momentum
     let left_p = -sigma_p; let right_p = sigma_p;
     let pLeft = (left_p - minP)/(maxP - minP) * W;
     let pRight = (right_p - minP)/(maxP - minP) * W;
-    let hTop = H/2 + (H/2.5) - (Math.exp(-0.5) * (H/1.5)); // height at 1 sigma = 0.606 max height
+    let hTop = H/2 + (H/2.5) - (Math.exp(-0.5) * (H/1.5));
 
-    ctx.strokeStyle = THEME.yellow;
+    ctx.strokeStyle = THEME.bracket;
     ctx.setLineDash([5, 5]);
     ctx.beginPath();
     ctx.moveTo(pLeft, hTop - 30); ctx.lineTo(pLeft, hTop + 30);
@@ -229,12 +225,13 @@ function renderMomentumSpace(dp) {
     ctx.beginPath();
     ctx.moveTo(pLeft, hTop - 30); ctx.lineTo(pRight, hTop - 30);
     ctx.stroke();
-    
+
     ctx.setLineDash([]);
-    ctx.fillStyle = THEME.yellow;
+    ctx.fillStyle = THEME.bracket;
     ctx.beginPath(); ctx.moveTo(pLeft, hTop-30); ctx.lineTo(pLeft+6, hTop-30-4); ctx.lineTo(pLeft+6, hTop-30+4); ctx.fill();
     ctx.beginPath(); ctx.moveTo(pRight, hTop-30); ctx.lineTo(pRight-6, hTop-30-4); ctx.lineTo(pRight-6, hTop-30+4); ctx.fill();
 
+    ctx.fillStyle = '#cccccc';
     ctx.textAlign = "center";
     ctx.font = "bold 14px sans-serif";
     ctx.fillText("Δp", W/2, hTop - 38);
@@ -252,78 +249,73 @@ function renderProductGraph() {
     const W = prodGraphCanvas.width;
     const H = prodGraphCanvas.height;
 
+    // White background
     ctx.clearRect(0,0,W,H);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0,0,W,H);
     
     const pL = 60, pR = 20, pT = 20, pB = 40;
     
-    // Coordinate mapping functions based strictly on log scales
-    // X scale: 10^-1 to 10^1
+    // Coordinate mapping functions
     const logMinX = -1, logMaxX = 1;
     function getX(val) {
         let l = Math.log10(val);
         return pL + ((l - logMinX)/(logMaxX - logMinX)) * (W - pL - pR);
     }
-    
-    // Y scale: 10^-35 to 10^-31
     const logMinY = -35, logMaxY = -31;
     function getY(val) {
         let l = Math.log10(val);
         return H - pB - ((l - logMinY)/(logMaxY - logMinY)) * (H - pT - pB);
     }
 
-    // Grid rendering
-    ctx.strokeStyle = THEME.grid;
+    // ── Grid lines (light grey) ──
+    ctx.strokeStyle = 'rgba(0,0,0,0.10)';
     ctx.lineWidth = 1;
     ctx.beginPath();
-    
-    // Y-axis grid & labels (-35 to -31)
-    ctx.fillStyle = THEME.textAxis;
-    ctx.font = "11px sans-serif";
+    ctx.fillStyle = '#333333';
+    ctx.font = "11px 'Courier New', monospace";
     ctx.textAlign = "right";
     ctx.textBaseline = "middle";
     for(let i = logMinY; i <= logMaxY; i++) {
         let y = H - pB - ((i - logMinY)/(logMaxY - logMinY)) * (H - pT - pB);
         ctx.moveTo(pL, y); ctx.lineTo(W - pR, y);
-        
-        // Draw tick label (e.g. 10^-35)
         ctx.fillText(`10`, pL - 20, y - 4);
-        ctx.font = "9px sans-serif";
+        ctx.font = "9px 'Courier New', monospace";
         ctx.fillText(i, pL - 5, y - 9);
-        ctx.font = "11px sans-serif";
+        ctx.font = "11px 'Courier New', monospace";
     }
-
-    // X-axis grid & labels (-1 to 1)
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
     for(let i = logMinX; i <= logMaxX; i++) {
         let x = pL + ((i - logMinX)/(logMaxX - logMinX)) * (W - pL - pR);
         ctx.moveTo(x, pT); ctx.lineTo(x, H - pB + 5);
-        
         ctx.fillText(`10`, x - 5, H - pB + 10);
-        ctx.font = "9px sans-serif";
+        ctx.font = "9px 'Courier New', monospace";
         ctx.fillText(i, x + 5, H - pB + 5);
-        ctx.font = "11px sans-serif";
+        ctx.font = "11px 'Courier New', monospace";
     }
     ctx.stroke();
 
-    // Axes Frame
-    ctx.strokeStyle = "#8ba1c7"; // Distinct axes frame
-    ctx.lineWidth = 1.5;
+    // Axes frame (solid black)
+    ctx.strokeStyle = '#111111';
+    ctx.lineWidth = 1.8;
+    ctx.setLineDash([]);
     ctx.beginPath();
     ctx.moveTo(pL, pT); ctx.lineTo(pL, H - pB); ctx.lineTo(W - pR, H - pB);
     ctx.stroke();
 
-    // Constant limit line (h/2)
+    // ── ℏ/2 limit line (grey dashed) ──
     let yLim = getY(LIMIT);
-    ctx.strokeStyle = THEME.green;
+    ctx.strokeStyle = THEME.limitLine;
     ctx.setLineDash([5,5]);
     ctx.beginPath();
     ctx.moveTo(pL, yLim); ctx.lineTo(W - pR, yLim);
     ctx.stroke();
-    
-    // Draw sweeping actual parabola line
-    ctx.strokeStyle = THEME.yellow;
     ctx.setLineDash([]);
+    
+    // ── Uncertainty product curve (black solid) ──
+    ctx.strokeStyle = '#111111';
+    ctx.lineWidth = 2;
     ctx.beginPath();
     for(let xval = 0.1; xval <= 10.0; xval += 0.1) {
         let px = getX(xval);
@@ -334,65 +326,65 @@ function renderProductGraph() {
     }
     ctx.stroke();
 
-    // Draw all recorded points 
+    // ── Recorded observation dots (black, white stroke) ──
     observations.forEach(obs => {
         let px = getX(obs.dx_val);
         let py = getY(obs.product);
-        
-        ctx.fillStyle = THEME.yellow;
+        ctx.fillStyle = THEME.dot;
         ctx.beginPath();
         ctx.arc(px, py, 4, 0, Math.PI*2);
         ctx.fill();
-        ctx.strokeStyle = "#fff";
-        ctx.lineWidth = 1;
+        ctx.strokeStyle = THEME.dotStroke;
+        ctx.lineWidth = 1.5;
         ctx.stroke();
     });
 
-    // Current point cursor!
+    // ── Current position marker (larger solid black) ──
     let dx_val = parseFloat(dxSlider.value);
     let px = getX(dx_val);
     let prod_val = 1e-34 * 0.5 * (Math.pow(dx_val, 2) + Math.pow(dx_val, -2));
     let py = getY(prod_val);
-
-    // Glowing current marker
-    ctx.fillStyle = THEME.purple;
+    ctx.fillStyle = '#111111';
     ctx.beginPath();
     ctx.arc(px, py, 6, 0, Math.PI*2);
     ctx.fill();
-    ctx.strokeStyle = "#fff";
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1.5;
     ctx.stroke();
 
     // Axis titles
-    ctx.fillStyle = "white";
+    ctx.fillStyle = '#333333';
+    ctx.font = "11px 'Courier New', monospace";
     ctx.textAlign = "center";
     ctx.fillText("Δx (nm)", pL + (W-pL-pR)/2, H - 10);
-    
     ctx.save();
     ctx.translate(15, H/2);
     ctx.rotate(-Math.PI/2);
     ctx.fillText("Δx · Δp (J·s)", 0, 0);
     ctx.restore();
 
-    // Reference Legend Matching User Image
-    ctx.fillStyle = "#0c1221"; // very dark box
-    ctx.fillRect(W - pR - 105, pT + 5, 100, 50);
-    ctx.strokeStyle = THEME.grid;
-    ctx.strokeRect(W - pR - 105, pT + 5, 100, 50);
+    // ── Legend (B&W box) ──
+    ctx.fillStyle = '#f0f0f0';
+    ctx.strokeStyle = '#cccccc';
+    ctx.lineWidth = 1;
+    ctx.fillRect(W - pR - 105, pT + 5, 100, 52);
+    ctx.strokeRect(W - pR - 105, pT + 5, 100, 52);
 
-    ctx.fillStyle = "#ffffff";
+    ctx.fillStyle = '#111111';
+    ctx.font = "10px 'Courier New', monospace";
     ctx.textAlign = "left";
-    ctx.fillText("Δx · Δp (Actual)", W - pR - 70, pT + 22);
-    ctx.fillText("ℏ/2 (Limit)", W - pR - 70, pT + 42);
-    
-    ctx.fillStyle = THEME.yellow;
+    ctx.fillText("Δx·Δp (Actual)", W - pR - 70, pT + 22);
+    ctx.fillText("ℏ/2 (Limit)",    W - pR - 70, pT + 42);
+    // Legend dots/lines
+    ctx.fillStyle = '#111111';
     ctx.beginPath(); ctx.arc(W - pR - 85, pT + 17, 3, 0, Math.PI*2); ctx.fill();
-    ctx.strokeStyle = THEME.yellow;
+    ctx.strokeStyle = '#111111';
     ctx.setLineDash([]);
     ctx.beginPath(); ctx.moveTo(W - pR - 95, pT + 17); ctx.lineTo(W - pR - 75, pT + 17); ctx.stroke();
-    
-    ctx.strokeStyle = THEME.green;
+    ctx.strokeStyle = '#555555';
     ctx.setLineDash([3,3]);
     ctx.beginPath(); ctx.moveTo(W - pR - 95, pT + 37); ctx.lineTo(W - pR - 75, pT + 37); ctx.stroke();
+    ctx.setLineDash([]);
 }
 
 // ─── DATA BOARD ──────────────────────────────────────────────
@@ -434,12 +426,12 @@ function renderTable() {
     
     obsBody.innerHTML = observations.map((obs, i) => `
         <tr>
-            <td class="text-secondary fw-bold">${i + 1}</td>
-            <td style="color:#8a2be2"><b>${obs.dx_val.toFixed(2)}</b></td>
-            <td style="color:#0056b3"><b>${formatSciHTML(obs.dp)}</b></td>
-            <td class="fw-bold text-dark">${formatSciHTML(obs.product)}</td>
-            <td class="text-success">${formatSciHTML(LIMIT)}</td>
-            <td class="text-success fw-bold">≥ ℏ/2 ✓</td>
+            <td class="fw-bold text-secondary">${i + 1}</td>
+            <td class="fw-bold">${obs.dx_val.toFixed(2)}</td>
+            <td class="fw-bold">${formatSciHTML(obs.dp)}</td>
+            <td class="fw-bold">${formatSciHTML(obs.product)}</td>
+            <td>${formatSciHTML(LIMIT)}</td>
+            <td class="fw-bold">≥ ℏ/2 ✓</td>
         </tr>
     `).join("");
 }

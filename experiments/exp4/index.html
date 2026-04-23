@@ -9,18 +9,17 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <link rel="stylesheet" href="../../css/vlabs-theme.css">
 
     <style>
-        body {
-            background-color: #f8f9fa;
-        }
+        body { background-color: #f5f5f5; }
 
-        /* ── Canvas — full width, tall ── */
+        /* ── Canvas — full width ── */
         .bench-canvas-wrap {
-            background: #0a0e14;
-            border-radius: 6px;
+            background: #0d0d0d;
+            border-radius: 8px;
             padding: 8px;
-            border: 1px solid #dee2e6;
+            border: 1px solid #333333;
         }
 
         #beamCanvas {
@@ -33,38 +32,34 @@
         /* ── Live readout strip ── */
         .readout-strip {
             display: flex;
-            border: 1px solid #dee2e6;
+            border: 1px solid #cccccc;
             border-radius: 6px;
             overflow: hidden;
-            background: #fff;
+            background: #f0f0f0;
         }
 
         .readout-item {
             flex: 1;
             padding: 0.55rem 1rem;
-            border-right: 1px solid #dee2e6;
+            border-right: 1px solid #cccccc;
             text-align: center;
         }
-
-        .readout-item:last-child {
-            border-right: none;
-        }
+        .readout-item:last-child { border-right: none; }
 
         .readout-label {
             font-size: 0.68rem;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: #6c757d;
+            color: #555555;
         }
-
         .readout-value {
             font-size: 1.1rem;
             font-weight: 600;
-            color: #212529;
+            color: #111111;
             font-family: 'Courier New', monospace;
         }
 
-        /* ── Observation table — no fixed height cap, let it breathe ── */
+        /* ── Observation table ── */
         #obs-table th,
         #obs-table td {
             font-size: 0.92rem;
@@ -75,13 +70,13 @@
         .physics-ref {
             font-size: 0.82rem;
             font-family: 'Courier New', monospace;
-            color: #495057;
+            color: #333333;
             line-height: 1.9;
         }
 
         .ref-title {
             font-weight: 700;
-            color: #212529;
+            color: #111111;
             font-size: 0.72rem;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -89,7 +84,6 @@
             font-family: inherit;
         }
     </style>
-    <link rel="stylesheet" href="../../css/vlabs-theme.css">
 </head>
 
 <body class="bg-light">
@@ -110,18 +104,16 @@
             <p class="text-muted small">Measurement of beam spreading with distance</p>
         </div>
 
-        <!-- ══════════════════════════════════════════════════
-         ROW 1 — FULL-WIDTH SIMULATION
-    ══════════════════════════════════════════════════ -->
+        <!-- ROW 1 — FULL-WIDTH SIMULATION -->
         <div class="card shadow-sm border-0 p-3 mb-4" id="circuit-card">
             <h5 class="text-center mb-3 border-bottom pb-2">Experimental Setup</h5>
 
-            <!-- Canvas — fills the full card width, tall intrinsic size -->
+            <!-- Canvas -->
             <div class="bench-canvas-wrap mb-3">
                 <canvas id="beamCanvas" width="1200" height="380"></canvas>
             </div>
 
-            <!-- Live readout strip — 3 metrics across full width -->
+            <!-- Live readout strip -->
             <div class="readout-strip mb-3">
                 <div class="readout-item">
                     <div class="readout-label">Distance</div>
@@ -137,7 +129,7 @@
                 </div>
             </div>
 
-            <!-- Controls — 4 across on wide screens -->
+            <!-- Controls -->
             <div class="p-3 bg-light rounded border">
                 <div class="row align-items-end g-3">
 
@@ -185,12 +177,10 @@
             </div>
         </div>
 
-        <!-- ══════════════════════════════════════════════════
-         ROW 2 — OBSERVATIONS  +  PHYSICS REF
-    ══════════════════════════════════════════════════ -->
+        <!-- ROW 2 — OBSERVATIONS + PHYSICS REF -->
         <div class="row g-4 align-items-start">
 
-            <!-- Observation table — wider, no fixed height cap -->
+            <!-- Observation table -->
             <div class="col-lg-5">
                 <div class="card shadow-sm border-0 p-3">
                     <h5 class="fw-bold mb-3 text-center border-bottom pb-2">Observations</h5>
@@ -224,7 +214,7 @@
                             </div>
                             <div class="col-6">
                                 <button id="download-pdf"
-                                    class="btn btn-danger btn-sm w-100 text-white fw-bold">Download PDF</button>
+                                    class="btn btn-danger btn-sm w-100 fw-bold">Download PDF</button>
                             </div>
                         </div>
                         <button onclick="calculateDivergence()" class="btn btn-success btn-lg mt-1 fw-bold">
@@ -234,7 +224,7 @@
                 </div>
             </div>
 
-            <!-- Physics reference — right column -->
+            <!-- Physics reference -->
             <div class="col-lg-7">
                 <div class="card shadow-sm border-0 p-3">
                     <h5 class="fw-bold mb-3 text-center border-bottom pb-2">Physics Reference</h5>
