@@ -1,25 +1,22 @@
 /* Physics Constants & DOM Elements */
-const HBAR = 1.0545718e-34; 
-const LIMIT = HBAR / 2; // 5.27 x 10^-35 J.s
-// Using the product from the reference image (~2 * limit) 
-const CONST_PRODUCT = 1.054e-33;
+const HBAR = 1.0545718e-34;
+const LIMIT = HBAR / 2;
 
-const dxSlider = document.getElementById("x-slider");
-const val_dx = document.getElementById("val-dx");
-const val_dp = document.getElementById("val-dp");
-const val_prod = document.getElementById("val-prod");
+const xSlider = document.getElementById("x-slider");
+const pSlider = document.getElementById("p-slider");
+const xMeter = document.getElementById("x-meter");
+const pMeter = document.getElementById("p-meter");
+const productVal = document.getElementById("product-val");
+const warningText = document.getElementById("warning-text");
 const obsBody = document.getElementById("obs-body");
 const addBtn = document.getElementById("add-reading");
 const clearBtn = document.getElementById("clear-data");
 const downloadPdfBtn = document.getElementById("download-pdf");
 
-const realCanvas = document.getElementById("realCanvas");
-const momCanvas = document.getElementById("momCanvas");
-const prodGraphCanvas = document.getElementById("productGraphCanvas");
-
 let observations = [];
-const maxObservations = 10; 
+const maxObservations = 8;
 
+/* Helper: Format number to HTML scientific notation */
 function formatSciHTML(num) {
     if (num === 0) return "0";
     let exp = Math.floor(Math.log10(num));
@@ -27,6 +24,7 @@ function formatSciHTML(num) {
     return `${mantissa.toFixed(2)} &times; 10<sup>${exp}</sup>`;
 }
 
+/* Helper: Format number to plain text scientific notation for the PDF */
 function formatSciText(num) {
     if (num === 0) return "0";
     let exp = Math.floor(Math.log10(num));
@@ -34,488 +32,221 @@ function formatSciText(num) {
     return `${mantissa.toFixed(2)} x 10^${exp}`;
 }
 
-// Global drawing configurations — B&W palette
-const THEME = {
-    bg:       "#06090e",
-    grid:     "rgba(255,255,255,0.10)",
-    wave1:    "#cccccc",
-    wave2:    "#eeeeee",
-    bracket:  "#888888",
-    line:     "#111111",
-    limitLine:"#555555",
-    dot:      "#111111",
-    dotStroke:"#ffffff",
-    textAxis: "rgba(255,255,255,0.6)"
-};
-
-// ─── RENDERING LOGIC ───
-
-function drawGrid(ctx, W, H, hLines, vLines) {
-    ctx.strokeStyle = THEME.grid;
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    for(let i=0; i<=hLines; i++) {
-        let y = (H/hLines)*i;
-        ctx.moveTo(0, y); ctx.lineTo(W, y);
+/* Chart.js Setup */
+const ctx = document.getElementById('waveChart').getContext('2d');
+const waveChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: [],
+        datasets: [
+            {
+                label: 'Position |ψ(x)|²',
+                borderColor: '#0d6efd',
+                backgroundColor: 'rgba(13, 110, 253, 0.15)',
+                fill: true, data: [], tension: 0.4
+            },
+            {
+                label: 'Momentum |Φ(p)|²',
+                borderColor: '#dc3545',
+                backgroundColor: 'rgba(220, 53, 69, 0.15)',
+                fill: true, data: [], tension: 0.4
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 150 },
+        elements: { point: { radius: 0 } },
+        scales: { x: { display: false }, y: { display: false, min: 0, max: 1.1 } },
+        plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 12 } } }
     }
-    for(let i=0; i<=vLines; i++) {
-        let x = (W/vLines)*i;
-        ctx.moveTo(x, 0); ctx.lineTo(x, H);
-    }
-    ctx.stroke();
+});
 
-    // Central Axes (slightly brighter white)
-    ctx.strokeStyle = "rgba(255,255,255,0.30)";
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(W/2, 0); ctx.lineTo(W/2, H);
-    ctx.moveTo(0, H/2); ctx.lineTo(W, H/2);
-    ctx.stroke();
+function generateGaussianData(sigma) {
+    let data = [], labels = [];
+    for (let i = -10; i <= 10; i += 0.2) {
+        labels.push(i.toFixed(1));
+        data.push(Math.exp(-(i * i) / (2 * sigma * sigma)));
+    }
+    return { labels, data };
 }
 
-function processAndRender() {
-    // 1. Calculations
-    let dx_val = parseFloat(dxSlider.value); // in nm
-    let dx_SI = dx_val * 1e-9;
-    
-    // Applying synthetic coupled physics to match the reference graph's parabolic shape
-    // P(x) = 1e-34 * 0.5 * (x^2 + 1/x^2)
-    let prod_SI = 1e-34 * 0.5 * (Math.pow(dx_val, 2) + Math.pow(dx_val, -2));
-    
-    let dp_SI = prod_SI / dx_SI;
-    let dp_disp = dp_SI * 1e24; // scale for display string
+function updateSimulation() {
+    let dx_val = parseFloat(xSlider.value);
+    let dp_val = parseFloat(pSlider.value);
 
-    // Output texts
-    val_dx.innerText = dx_val.toFixed(2);
-    // Format dp specifically for neatness
-    val_dp.innerHTML = `${(dp_SI / Math.pow(10, Math.floor(Math.log10(dp_SI)))).toFixed(2)} &times; 10<sup>${Math.floor(Math.log10(dp_SI))}</sup>`;
-    val_prod.innerHTML = `${(prod_SI / Math.pow(10, Math.floor(Math.log10(prod_SI)))).toFixed(2)} &times; 10<sup>${Math.floor(Math.log10(prod_SI))}</sup>`;
+    let dx_SI = dx_val * 1e-12;
+    let dp_SI = dp_val * 1e-24;
+    let product_SI = dx_SI * dp_SI;
 
-    // 2. Render Real Space Canvas
-    renderRealSpace(dx_val);
+    xMeter.innerText = dx_val.toFixed(1);
+    pMeter.innerText = dp_val.toFixed(1);
+    productVal.innerHTML = formatSciHTML(product_SI);
 
-    // 3. Render Momentum Space Canvas
-    renderMomentumSpace(dp_disp);
-    
-    // 4. Render Product Graph
-    renderProductGraph();
+    const posData = generateGaussianData(dx_val / 20);
+    const momData = generateGaussianData(dp_val / 3);
+
+    waveChart.data.labels = posData.labels;
+    waveChart.data.datasets[0].data = posData.data;
+    waveChart.data.datasets[1].data = momData.data;
+    waveChart.update();
+
+    if (product_SI < LIMIT) {
+        document.getElementById("product-display").classList.add("text-danger");
+        warningText.style.display = "block";
+    } else {
+        document.getElementById("product-display").classList.remove("text-danger");
+        warningText.style.display = "none";
+    }
 }
-
-function renderRealSpace(dx) {
-    const ctx = realCanvas.getContext("2d");
-    const W = realCanvas.width;
-    const H = realCanvas.height;
-
-    ctx.clearRect(0,0,W,H);
-    drawGrid(ctx, W, H, 10, 20);
-
-    // X ranges from -10 to 10 conceptually
-    const minX = -10; const maxX = 10;
-    
-    // Wave parameters
-    let sigma_x = dx; 
-    let k = 8; // frequency of the carrier sine wave
-    
-    ctx.beginPath();
-    for(let px=0; px<=W; px+=1) {
-        let x = minX + (px/W)*(maxX - minX);
-        let envelope = Math.exp(-(x*x)/(2*sigma_x*sigma_x));
-        let y_val = Math.cos(k*x) * envelope;
-        
-        let py = H/2 - (y_val * (H/2.5));
-        if(px===0) ctx.moveTo(px, py);
-        else ctx.lineTo(px, py);
-    }
-    
-    ctx.strokeStyle = THEME.wave1;
-    ctx.lineWidth = 2.5;
-    ctx.shadowColor = THEME.wave1;
-    ctx.shadowBlur = 8;
-    ctx.stroke();
-    ctx.shadowBlur = 0;
-
-    // Draw Width lines (spanning -sigma to +sigma)
-    let left_x = -dx; let right_x = dx;
-    let pLeft = (left_x - minX)/(maxX - minX) * W;
-    let pRight = (right_x - minX)/(maxX - minX) * W;
-
-    // Height of envelope at 1 standard deviation
-    let env_point = Math.exp(-0.5);
-    let env_y = H/2 - (env_point * (H/2.5));
-    let bracket_y = env_y - 25;
-
-    // Measurement bracket lines
-    ctx.strokeStyle = THEME.bracket;
-    ctx.lineWidth = 1.5;
-    ctx.setLineDash([4, 4]);
-    ctx.beginPath();
-    ctx.moveTo(pLeft, bracket_y); ctx.lineTo(pLeft, env_y - 2);
-    ctx.moveTo(pRight, bracket_y); ctx.lineTo(pRight, env_y - 2);
-    ctx.stroke();
-
-    // Horizontal top measurement bar
-    ctx.beginPath();
-    ctx.moveTo(pLeft, bracket_y); ctx.lineTo(pRight, bracket_y);
-    ctx.stroke();
-
-    // Arrows pointing outwards
-    ctx.setLineDash([]);
-    ctx.fillStyle = THEME.bracket;
-    ctx.beginPath(); ctx.moveTo(pLeft, bracket_y); ctx.lineTo(pLeft+6, bracket_y-4); ctx.lineTo(pLeft+6, bracket_y+4); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(pRight, bracket_y); ctx.lineTo(pRight-6, bracket_y-4); ctx.lineTo(pRight-6, bracket_y+4); ctx.fill();
-
-    ctx.fillStyle = '#cccccc';
-    ctx.textAlign = "center";
-    ctx.font = "bold 13px Arial";
-    ctx.fillText("Δx", W/2, bracket_y - 8);
-
-    // Axis labels
-    ctx.fillStyle = THEME.textAxis;
-    ctx.font = "11px sans-serif";
-    ctx.fillText("-10", 15, H/2 + 15);
-    ctx.fillText("10", W - 15, H/2 + 15);
-    ctx.fillText("x (nm)", W/2, H - 10);
-}
-
-function renderMomentumSpace(dp) {
-    const ctx = momCanvas.getContext("2d");
-    const W = momCanvas.width;
-    const H = momCanvas.height;
-
-    ctx.clearRect(0,0,W,H);
-    drawGrid(ctx, W, H, 10, 12);
-
-    // Base conceptual range on momentum. Since dp goes inversely with dx (0.1 to 10 nm)
-    // dp range is proportional bounds. Let's fix axis -6 to 6 arbitrary units.
-    const minP = -6; const maxP = 6;
-    
-    // Using dp directly as standard deviation mapping for visual scale
-    let sigma_p = (dp / 5.25) * 1.5; // normalized visual scale based on midpoint
-
-    ctx.beginPath();
-    for(let px=0; px<=W; px+=1) {
-        let p = minP + (px/W)*(maxP - minP);
-        let y_val = Math.exp(-(p*p)/(2*sigma_p*sigma_p));
-        
-        let py = H/2 + (H/2.5) - (y_val * (H/1.5));
-        if(px===0) ctx.moveTo(px, py);
-        else ctx.lineTo(px, py);
-    }
-    
-    ctx.strokeStyle = THEME.wave2;
-    ctx.lineWidth = 2.5;
-    ctx.shadowColor = THEME.wave2;
-    ctx.shadowBlur = 8;
-    ctx.stroke();
-    ctx.shadowBlur = 0;
-
-    // Width lines for momentum
-    let left_p = -sigma_p; let right_p = sigma_p;
-    let pLeft = (left_p - minP)/(maxP - minP) * W;
-    let pRight = (right_p - minP)/(maxP - minP) * W;
-    let hTop = H/2 + (H/2.5) - (Math.exp(-0.5) * (H/1.5));
-
-    ctx.strokeStyle = THEME.bracket;
-    ctx.setLineDash([5, 5]);
-    ctx.beginPath();
-    ctx.moveTo(pLeft, hTop - 30); ctx.lineTo(pLeft, hTop + 30);
-    ctx.moveTo(pRight, hTop - 30); ctx.lineTo(pRight, hTop + 30);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(pLeft, hTop - 30); ctx.lineTo(pRight, hTop - 30);
-    ctx.stroke();
-
-    ctx.setLineDash([]);
-    ctx.fillStyle = THEME.bracket;
-    ctx.beginPath(); ctx.moveTo(pLeft, hTop-30); ctx.lineTo(pLeft+6, hTop-30-4); ctx.lineTo(pLeft+6, hTop-30+4); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(pRight, hTop-30); ctx.lineTo(pRight-6, hTop-30-4); ctx.lineTo(pRight-6, hTop-30+4); ctx.fill();
-
-    ctx.fillStyle = '#cccccc';
-    ctx.textAlign = "center";
-    ctx.font = "bold 14px sans-serif";
-    ctx.fillText("Δp", W/2, hTop - 38);
-
-    // Axis labels
-    ctx.fillStyle = THEME.textAxis;
-    ctx.font = "11px sans-serif";
-    ctx.fillText("-6", 15, H - 20);
-    ctx.fillText("6", W - 15, H - 20);
-    ctx.fillText("p (kg m/s)", W/2, H - 5);
-}
-
-function renderProductGraph() {
-    const ctx = prodGraphCanvas.getContext("2d");
-    const W = prodGraphCanvas.width;
-    const H = prodGraphCanvas.height;
-
-    // White background
-    ctx.clearRect(0,0,W,H);
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0,0,W,H);
-    
-    const pL = 60, pR = 20, pT = 20, pB = 40;
-    
-    // Coordinate mapping functions
-    const logMinX = -1, logMaxX = 1;
-    function getX(val) {
-        let l = Math.log10(val);
-        return pL + ((l - logMinX)/(logMaxX - logMinX)) * (W - pL - pR);
-    }
-    const logMinY = -35, logMaxY = -31;
-    function getY(val) {
-        let l = Math.log10(val);
-        return H - pB - ((l - logMinY)/(logMaxY - logMinY)) * (H - pT - pB);
-    }
-
-    // ── Grid lines (light grey) ──
-    ctx.strokeStyle = 'rgba(0,0,0,0.10)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.fillStyle = '#333333';
-    ctx.font = "11px 'Courier New', monospace";
-    ctx.textAlign = "right";
-    ctx.textBaseline = "middle";
-    for(let i = logMinY; i <= logMaxY; i++) {
-        let y = H - pB - ((i - logMinY)/(logMaxY - logMinY)) * (H - pT - pB);
-        ctx.moveTo(pL, y); ctx.lineTo(W - pR, y);
-        ctx.fillText(`10`, pL - 20, y - 4);
-        ctx.font = "9px 'Courier New', monospace";
-        ctx.fillText(i, pL - 5, y - 9);
-        ctx.font = "11px 'Courier New', monospace";
-    }
-    ctx.textAlign = "center";
-    ctx.textBaseline = "top";
-    for(let i = logMinX; i <= logMaxX; i++) {
-        let x = pL + ((i - logMinX)/(logMaxX - logMinX)) * (W - pL - pR);
-        ctx.moveTo(x, pT); ctx.lineTo(x, H - pB + 5);
-        ctx.fillText(`10`, x - 5, H - pB + 10);
-        ctx.font = "9px 'Courier New', monospace";
-        ctx.fillText(i, x + 5, H - pB + 5);
-        ctx.font = "11px 'Courier New', monospace";
-    }
-    ctx.stroke();
-
-    // Axes frame (solid black)
-    ctx.strokeStyle = '#111111';
-    ctx.lineWidth = 1.8;
-    ctx.setLineDash([]);
-    ctx.beginPath();
-    ctx.moveTo(pL, pT); ctx.lineTo(pL, H - pB); ctx.lineTo(W - pR, H - pB);
-    ctx.stroke();
-
-    // ── ℏ/2 limit line (grey dashed) ──
-    let yLim = getY(LIMIT);
-    ctx.strokeStyle = THEME.limitLine;
-    ctx.setLineDash([5,5]);
-    ctx.beginPath();
-    ctx.moveTo(pL, yLim); ctx.lineTo(W - pR, yLim);
-    ctx.stroke();
-    ctx.setLineDash([]);
-    
-    // ── Uncertainty product curve (black solid) ──
-    ctx.strokeStyle = '#111111';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    for(let xval = 0.1; xval <= 10.0; xval += 0.1) {
-        let px = getX(xval);
-        let prod = 1e-34 * 0.5 * (Math.pow(xval, 2) + Math.pow(xval, -2));
-        let py = getY(prod);
-        if (xval === 0.1) ctx.moveTo(px, py);
-        else ctx.lineTo(px, py);
-    }
-    ctx.stroke();
-
-    // ── Recorded observation dots (black, white stroke) ──
-    observations.forEach(obs => {
-        let px = getX(obs.dx_val);
-        let py = getY(obs.product);
-        ctx.fillStyle = THEME.dot;
-        ctx.beginPath();
-        ctx.arc(px, py, 4, 0, Math.PI*2);
-        ctx.fill();
-        ctx.strokeStyle = THEME.dotStroke;
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-    });
-
-    // ── Current position marker (larger solid black) ──
-    let dx_val = parseFloat(dxSlider.value);
-    let px = getX(dx_val);
-    let prod_val = 1e-34 * 0.5 * (Math.pow(dx_val, 2) + Math.pow(dx_val, -2));
-    let py = getY(prod_val);
-    ctx.fillStyle = '#111111';
-    ctx.beginPath();
-    ctx.arc(px, py, 6, 0, Math.PI*2);
-    ctx.fill();
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-
-    // Axis titles
-    ctx.fillStyle = '#333333';
-    ctx.font = "11px 'Courier New', monospace";
-    ctx.textAlign = "center";
-    ctx.fillText("Δx (nm)", pL + (W-pL-pR)/2, H - 10);
-    ctx.save();
-    ctx.translate(15, H/2);
-    ctx.rotate(-Math.PI/2);
-    ctx.fillText("Δx · Δp (J·s)", 0, 0);
-    ctx.restore();
-
-    // ── Legend (B&W box) ──
-    ctx.fillStyle = '#f0f0f0';
-    ctx.strokeStyle = '#cccccc';
-    ctx.lineWidth = 1;
-    ctx.fillRect(W - pR - 105, pT + 5, 100, 52);
-    ctx.strokeRect(W - pR - 105, pT + 5, 100, 52);
-
-    ctx.fillStyle = '#111111';
-    ctx.font = "10px 'Courier New', monospace";
-    ctx.textAlign = "left";
-    ctx.fillText("Δx·Δp (Actual)", W - pR - 70, pT + 22);
-    ctx.fillText("ℏ/2 (Limit)",    W - pR - 70, pT + 42);
-    // Legend dots/lines
-    ctx.fillStyle = '#111111';
-    ctx.beginPath(); ctx.arc(W - pR - 85, pT + 17, 3, 0, Math.PI*2); ctx.fill();
-    ctx.strokeStyle = '#111111';
-    ctx.setLineDash([]);
-    ctx.beginPath(); ctx.moveTo(W - pR - 95, pT + 17); ctx.lineTo(W - pR - 75, pT + 17); ctx.stroke();
-    ctx.strokeStyle = '#555555';
-    ctx.setLineDash([3,3]);
-    ctx.beginPath(); ctx.moveTo(W - pR - 95, pT + 37); ctx.lineTo(W - pR - 75, pT + 37); ctx.stroke();
-    ctx.setLineDash([]);
-}
-
-// ─── DATA BOARD ──────────────────────────────────────────────
 
 function addRow() {
-    let dx_val = parseFloat(dxSlider.value);
-    let dx_SI = dx_val * 1e-9;
-    
-    let prod_SI = 1e-34 * 0.5 * (Math.pow(dx_val, 2) + Math.pow(dx_val, -2));
-    let dp_SI = prod_SI / dx_SI;
+    let dx_val = parseFloat(xSlider.value);
+    let dp_val = parseFloat(pSlider.value);
 
-    if (observations.length >= maxObservations) observations.shift(); 
-    
-    // Check if duplicate point exists to avoid clutter
-    let existing = observations.find(o => o.dx_val === dx_val);
-    if(existing) return; 
+    let dx_SI = dx_val * 1e-12;
+    let dp_SI = dp_val * 1e-24;
+    let product_SI = dx_SI * dp_SI;
 
-    observations.push({ 
-        dx_val: dx_val, 
-        dx: dx_SI, 
-        dp: dp_SI, 
-        product: prod_SI 
-    });
-    
-    // Sort array by dx nicely
-    observations.sort((a,b) => a.dx_val - b.dx_val);
-    
+    if (observations.length >= maxObservations) observations.shift();
+
+    observations.push({ dx: dx_SI, dp: dp_SI, product: product_SI });
     renderTable();
-    processAndRender(); // update graph
 }
 
 function renderTable() {
-    if (observations.length === 0) {
-        document.getElementById("empty-hint").style.display = "block";
-        obsBody.innerHTML = "";
-        return;
-    }
-    document.getElementById("empty-hint").style.display = "none";
-    
     obsBody.innerHTML = observations.map((obs, i) => `
-        <tr>
-            <td class="fw-bold text-secondary">${i + 1}</td>
-            <td class="fw-bold">${obs.dx_val.toFixed(2)}</td>
-            <td class="fw-bold">${formatSciHTML(obs.dp)}</td>
+        <tr class="${obs.product < LIMIT ? 'table-danger' : ''}">
+            <td class="fw-bold text-muted">${i + 1}</td>
+            <td>${formatSciHTML(obs.dx)}</td>
+            <td>${formatSciHTML(obs.dp)}</td>
             <td class="fw-bold">${formatSciHTML(obs.product)}</td>
-            <td>${formatSciHTML(LIMIT)}</td>
-            <td class="fw-bold">≥ ℏ/2 ✓</td>
         </tr>
     `).join("");
 }
 
-// ─── PDF OUTPUT ──────────────────────────────────────────────
+function calculateUncertainty() {
+    if (observations.length == 0) {
+        alert("Please record observations first.");
+        return;
+    }
+
+    let last = observations[observations.length - 1];
+    let satisfied = last.product >= LIMIT;
+    let alertClass = satisfied ? "alert-success" : "alert-danger";
+    let icon = satisfied ? "✅ Principle Satisfied" : "❌ Principle Violated";
+
+    document.getElementById("calculation-output").innerHTML = `
+        <div class="card p-4 border-0 shadow-sm mt-2">
+            <h5 class="border-bottom pb-2 mb-3">Verification of Final Reading</h5>
+            <div class="row align-items-center">
+                <div class="col-md-6 math-text">
+                    <p class="mb-1"><b>Measured Δx:</b> ${formatSciHTML(last.dx)} m</p>
+                    <p class="mb-1"><b>Measured Δp:</b> ${formatSciHTML(last.dp)} kg·m/s</p>
+                    <p class="mb-0 text-primary fs-5 mt-2"><b>Your Product:</b> ${formatSciHTML(last.product)} J·s</p>
+                </div>
+                <div class="col-md-6 mt-3 mt-md-0">
+                    <div class="alert ${alertClass} text-center mb-0 py-3">
+                        <h5 class="mb-1 fw-bold">${icon}</h5>
+                        <span class="small">Theoretical Limit: $\\ge 5.27 \\times 10^{-35}$ J·s</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    if (window.MathJax) MathJax.typesetPromise();
+    document.getElementById("calculation-output").scrollIntoView({ behavior: 'smooth' });
+}
+
+/* --- PDF GENERATION LOGIC --- */
 function downloadPDF() {
     if (observations.length === 0) {
-        alert("No data recorded!"); return;
+        alert("No data to download. Please record some observations first.");
+        return;
     }
 
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF('p', 'mm', 'a4');
-    const PW = doc.internal.pageSize.getWidth();
+    const doc = new jsPDF();
 
-    doc.setFont('helvetica', 'bold').setFontSize(18);
-    doc.text('PICT Physics Virtual Lab', PW / 2, 15, { align: 'center' });
-    doc.setFontSize(12).setFont('helvetica', 'normal');
-    doc.text('Heisenberg Uncertainty Principle \u2013 Lab Report', PW / 2, 22, { align: 'center' });
-    doc.line(20, 25, PW - 20, 25);
+    // Title
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.text("PICT Quantum Physics Virtual Lab", 14, 20);
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "normal");
+    doc.text("Heisenberg Uncertainty Principle - Lab Report", 14, 28);
 
+    // Student Info Blank Fields
     doc.setFontSize(11);
-    doc.text('Name: ____________________________________', 20, 35);
-    doc.text('Roll No: __________________', 130, 35);
-    doc.text('Date: ____________________', 20, 43);
+    doc.text("Name: _________________________________", 14, 45);
+    doc.text("Roll No: __________________", 120, 45);
+    doc.text("Date: __________________", 14, 55);
 
-    doc.setFontSize(10).setTextColor(100);
-    doc.text('Formula: \u0394x \u00b7 \u0394p \u2265 \u210f/2    (\u210f/2 = 5.27 \u00d7 10\u207b\u00b3\u2075 J\u00b7s)', 20, 53);
-    doc.setTextColor(0);
+    // Theoretical Context
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text("Theoretical Limit: \u0394x * \u0394p >= hbar / 2 (approx 5.27 x 10^-35 J s)", 14, 70);
 
-    doc.setFont('helvetica', 'bold').setFontSize(11);
-    doc.text('Observations:', 20, 63);
-    
-    const tableData = observations.map((o, i) => [
-        i+1, o.dx_val.toFixed(2), formatSciText(o.dp), formatSciText(o.product), formatSciText(LIMIT)
-    ]);
-    
-    doc.autoTable({
-        startY: 67,
-        head: [['#', '\u0394x (nm)', '\u0394p (kg m/s)', 'Product (J.s)', 'Limit (J.s)']],
-        body: tableData,
-        theme: 'grid',
-        headStyles: { fillColor: [26, 26, 46] },
-        styles: { fontSize: 10, cellPadding: 4, halign: 'center' },
-        margin: { left: 20, right: 20 }
+    // Prepare Table Data
+    const tableColumn = ["Reading #", "Position Uncert. \u0394x (m)", "Momentum Uncert. \u0394p (kg m/s)", "Product \u0394x*\u0394p (J s)"];
+    const tableRows = [];
+
+    observations.forEach((obs, index) => {
+        const rowData = [
+            index + 1,
+            formatSciText(obs.dx),
+            formatSciText(obs.dp),
+            formatSciText(obs.product)
+        ];
+        tableRows.push(rowData);
     });
 
-    let y = doc.lastAutoTable.finalY + 12;
-    doc.setFont('helvetica', 'bold').setFontSize(11).setTextColor(0);
-    doc.text('Formula & Calculations:', 20, y);
-    doc.setFont('helvetica', 'normal');
-    doc.text('\u0394x \u00b7 \u0394p = Product', 20, y + 8);
-    doc.text('______________________________________', 20, y + 18);
+    // Generate Table
+    doc.autoTable({
+        startY: 75,
+        head: [tableColumn],
+        body: tableRows,
+        theme: 'grid',
+        headStyles: { fillColor: [13, 110, 253] }, // Bootstrap primary blue
+        styles: { fontSize: 10, cellPadding: 4, halign: 'center' }
+    });
 
-    y += 32;
-    doc.setFont('helvetica', 'bold');
-    doc.text('Result:', 20, y);
-    doc.setFont('helvetica', 'normal');
-    
-    let sumProd = 0;
-    observations.forEach(o => sumProd += o.product);
-    let avgProd = sumProd / observations.length;
-    
-    doc.text('Average Uncertainty Product = _____________ J·s', 20, y + 8);
-    doc.text('Theoretical Minimum (\u210f/2) = 5.27 \u00d7 10\u207b\u00b3\u2075 J·s', 20, y + 16);
-    
-    y += 16;
-    doc.setFont('helvetica', 'bold');
-    doc.text('Conclusion: __________________________________________________', 20, y + 16);
+    // Verification Section at the bottom
+    let lastY = doc.lastAutoTable.finalY + 15;
+    let last = observations[observations.length - 1];
+    let satisfied = last.product >= LIMIT;
+    let resultText = satisfied ? "Principle Satisfied." : "Principle Violated.";
 
-    doc.setTextColor(30, 80, 160);
-    doc.text(`[Computed] Average Product = ${formatSciText(avgProd)} J·s (Verified \u2265 \u210f/2)`, 20, y + 36);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(0);
+    doc.text("Final Reading Verification:", 14, lastY);
 
+    doc.setFont("helvetica", "normal");
+    doc.text(`Calculated Product: ${formatSciText(last.product)} J s`, 14, lastY + 8);
+
+    if (satisfied) {
+        doc.setTextColor(25, 135, 84); // Bootstrap success green
+    } else {
+        doc.setTextColor(220, 53, 69); // Bootstrap danger red
+    }
+    doc.text(`Conclusion: ${resultText}`, 14, lastY + 16);
+
+    // Save PDF
     doc.save("Heisenberg_Lab_Report.pdf");
 }
 
-/* Event Listeners */
-dxSlider.addEventListener("input", processAndRender);
+/* Listeners */
+xSlider.addEventListener("input", updateSimulation);
+pSlider.addEventListener("input", updateSimulation);
 addBtn.addEventListener("click", addRow);
 downloadPdfBtn.addEventListener("click", downloadPDF);
 clearBtn.addEventListener("click", () => {
     observations = [];
     renderTable();
-    processAndRender();
+    document.getElementById("calculation-output").innerHTML = "";
 });
 
-// Initialization calls
-processAndRender();
+// Init
+updateSimulation();

@@ -138,8 +138,12 @@
                             <label class="form-label small fw-bold mb-1">Distance (cm)</label>
                             <span class="badge bg-dark" id="dist-badge">50 cm</span>
                         </div>
-                        <input type="range" id="distance-slider" class="form-range" min="5" max="200" value="50"
+                        <div class="d-flex align-items-center gap-2">
+    <button type="button" class="btn btn-sm btn-outline-secondary border-0" onclick="document.getElementById('distance-slider').stepDown(); document.getElementById('distance-slider').dispatchEvent(new Event('input'))">&#9664;</button>
+    <input type="range" id="distance-slider" class="form-range" min="5" max="200" value="50"
                             oninput="document.getElementById('dist-badge').textContent=this.value+' cm'" />
+    <button type="button" class="btn btn-sm btn-outline-secondary border-0" onclick="document.getElementById('distance-slider').stepUp(); document.getElementById('distance-slider').dispatchEvent(new Event('input'))">&#9654;</button>
+</div>
                     </div>
 
                     <div class="col-sm-6 col-xl-3">
@@ -147,9 +151,13 @@
                             <label class="form-label small fw-bold mb-1">Beam Waist w₀ (mm)</label>
                             <span class="badge bg-dark" id="waist-badge">0.50 mm</span>
                         </div>
-                        <input type="range" id="waist-slider" class="form-range" min="0.1" max="2.0" step="0.05"
+                        <div class="d-flex align-items-center gap-2">
+    <button type="button" class="btn btn-sm btn-outline-secondary border-0" onclick="document.getElementById('waist-slider').stepDown(); document.getElementById('waist-slider').dispatchEvent(new Event('input'))">&#9664;</button>
+    <input type="range" id="waist-slider" class="form-range" min="0.1" max="2.0" step="0.05"
                             value="0.5"
                             oninput="document.getElementById('waist-badge').textContent=parseFloat(this.value).toFixed(2)+' mm'" />
+    <button type="button" class="btn btn-sm btn-outline-secondary border-0" onclick="document.getElementById('waist-slider').stepUp(); document.getElementById('waist-slider').dispatchEvent(new Event('input'))">&#9654;</button>
+</div>
                     </div>
 
                     <div class="col-sm-6 col-xl-3">
@@ -157,9 +165,13 @@
                             <label class="form-label small fw-bold mb-1">Divergence Factor</label>
                             <span class="badge bg-dark" id="theta-badge">0.02</span>
                         </div>
-                        <input type="range" id="theta-slider" class="form-range" min="0.01" max="0.10" step="0.01"
+                        <div class="d-flex align-items-center gap-2">
+    <button type="button" class="btn btn-sm btn-outline-secondary border-0" onclick="document.getElementById('theta-slider').stepDown(); document.getElementById('theta-slider').dispatchEvent(new Event('input'))">&#9664;</button>
+    <input type="range" id="theta-slider" class="form-range" min="0.01" max="0.10" step="0.01"
                             value="0.02"
                             oninput="document.getElementById('theta-badge').textContent=parseFloat(this.value).toFixed(2)" />
+    <button type="button" class="btn btn-sm btn-outline-secondary border-0" onclick="document.getElementById('theta-slider').stepUp(); document.getElementById('theta-slider').dispatchEvent(new Event('input'))">&#9654;</button>
+</div>
                     </div>
 
                     <div class="col-sm-6 col-xl-3">
@@ -182,12 +194,12 @@
 
             <!-- Observation table -->
             <div class="col-lg-5">
-                <div class="card shadow-sm border-0 p-3">
+                <div class="card shadow-sm border-0 p-3 h-100 d-flex flex-column">
                     <h5 class="fw-bold mb-3 text-center border-bottom pb-2">Observations</h5>
 
-                    <div class="table-responsive">
+                    <div class="table-responsive flex-grow-1">
                         <table id="obs-table" class="table table-hover text-center align-middle mb-0">
-                            <thead class="table-dark">
+                            <thead class="table-dark text-white">
                                 <tr>
                                     <th style="width:60px">#</th>
                                     <th>Distance (cm)</th>
@@ -205,52 +217,25 @@
                         No readings recorded yet. Adjust sliders and click <strong>Record Reading</strong>.
                     </p>
 
-                    <!-- Action buttons -->
-                    <div class="d-grid gap-2 mt-3">
-                        <button id="add-reading" class="btn btn-primary fw-bold">Record Reading</button>
-                        <div class="row g-2">
-                            <div class="col-6">
-                                <button id="clear-data" class="btn btn-outline-danger btn-sm w-100">Clear Table</button>
-                            </div>
-                            <div class="col-6">
-                                <button id="download-pdf"
-                                    class="btn btn-danger btn-sm w-100 fw-bold">Download PDF</button>
-                            </div>
-                        </div>
-                        <button onclick="calculateDivergence()" class="btn btn-success btn-lg mt-1 fw-bold">
-                            Calculate Divergence
+                    <div class="card-footer border-top-0 pb-1 pt-3 text-center bg-transparent mt-auto">
+                        <button id="add-reading" class="btn btn-primary btn-sm px-4 fw-bold shadow-sm">
+                            Record Reading
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Physics reference -->
+            <!-- Actions -->
             <div class="col-lg-7">
-                <div class="card shadow-sm border-0 p-3">
-                    <h5 class="fw-bold mb-3 text-center border-bottom pb-2">Physics Reference</h5>
-
-                    <div class="bg-white p-3 rounded border mb-3">
-                        <div class="ref-title">Gaussian Beam</div>
-                        <div class="physics-ref">
-                            w(z) = w₀ · √(1 + (z/z<sub>R</sub>)²)<br />
-                            z<sub>R</sub> = π·w₀²/λ &nbsp;(Rayleigh range)
-                        </div>
-                    </div>
-
-                    <div class="bg-white p-3 rounded border mb-3">
-                        <div class="ref-title">Divergence Half-Angle</div>
-                        <div class="physics-ref">
-                            θ = (D₂ − D₁) / (2·L)<br />
-                            Linear approx: D(x) = D₀ + θ·x
-                        </div>
-                    </div>
-
-                    <div class="bg-white p-3 rounded border">
-                        <div class="ref-title">Constants</div>
-                        <div class="physics-ref">
-                            c = 2.998 × 10⁸ m/s<br />
-                            h = 6.626 × 10⁻³⁴ J·s<br />
-                            1 mrad = 10⁻³ rad
+                <div class="card shadow-sm border-0 p-3 h-100 text-center">
+                    <h5 class="fw-bold mb-3 border-bottom pb-2">Actions</h5>
+                    <div class="d-flex flex-column justify-content-center h-100 gap-3 px-4">
+                        <button onclick="calculateDivergence()" class="btn btn-success py-2 fw-bold shadow-sm">
+                            Calculate Divergence
+                        </button>
+                        <div class="d-flex justify-content-center gap-3">
+                            <button id="clear-data" class="btn btn-outline-danger shadow-sm px-4">Clear Data</button>
+                            <button id="download-pdf" class="btn btn-danger shadow-sm px-4">Download Report PDF</button>
                         </div>
                     </div>
                 </div>

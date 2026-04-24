@@ -17,7 +17,9 @@
     <link rel="stylesheet" href="../../css/vlabs-theme.css">
 
     <style>
-        body { background-color: #f5f5f5; }
+        body {
+            background-color: #f5f5f5;
+        }
 
         /* ── Simulation Container ── */
         .sim-container {
@@ -25,7 +27,7 @@
             border-radius: 12px;
             border: 1px solid #333333;
             overflow: hidden;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
             margin-bottom: 2rem;
             position: relative;
         }
@@ -48,7 +50,7 @@
             top: 16px;
             right: 20px;
             z-index: 10;
-            background: rgba(20,20,20,0.75);
+            background: rgba(20, 20, 20, 0.75);
             border: 1px solid #444444;
             color: #eeeeee;
             font-weight: 600;
@@ -116,6 +118,7 @@
             background-color: #111111 !important;
             border: 1px solid #333333 !important;
         }
+
         .graph-card .card-header-title {
             color: #eeeeee;
             font-weight: 600;
@@ -128,7 +131,10 @@
             color: #eeeeee !important;
             border-color: #444444 !important;
         }
-        .sim-container option { background-color: #1a1a1a; }
+
+        .sim-container option {
+            background-color: #1a1a1a;
+        }
     </style>
 </head>
 
@@ -165,8 +171,10 @@
                     <!-- Instructions -->
                     <div class="col-lg-12">
                         <div class="instruction-bar">
-                            Vary the retarding potential using the slider. Adjust it until the simulated photocurrent (electrons) completely stops reaching the anode.
-                            The corresponding potential magnitude is the stopping potential ($V_0$). Record this and repeat for different wavelengths.
+                            Vary the retarding potential using the slider. Adjust it until the simulated photocurrent
+                            (electrons) completely stops reaching the anode.
+                            The corresponding potential magnitude is the stopping potential ($V_0$). Record this and
+                            repeat for different wavelengths.
                         </div>
                     </div>
 
@@ -179,7 +187,12 @@
                                     <label>Wavelength λ (nm)</label>
                                     <span class="badge badge-dark-custom" id="wave-badge">400 nm</span>
                                 </div>
-                                <input type="range" id="wave-slider" class="form-range" min="300" max="700" step="10" value="400">
+                                <div class="d-flex align-items-center gap-2">
+    <button type="button" class="btn btn-sm btn-outline-secondary border-0" onclick="document.getElementById('wave-slider').stepDown(); document.getElementById('wave-slider').dispatchEvent(new Event('input'))">&#9664;</button>
+    <input type="range" id="wave-slider" class="form-range" min="300" max="700" step="10"
+                                    value="400">
+    <button type="button" class="btn btn-sm btn-outline-secondary border-0" onclick="document.getElementById('wave-slider').stepUp(); document.getElementById('wave-slider').dispatchEvent(new Event('input'))">&#9654;</button>
+</div>
                                 <div class="d-flex justify-content-between mt-1">
                                     <small class="text-muted">UV</small>
                                     <small class="text-muted">IR</small>
@@ -213,7 +226,12 @@
                                     <label>Applied Potential (V)</label>
                                     <span class="badge badge-dark-custom" id="volt-badge">0.00 V</span>
                                 </div>
-                                <input type="range" id="volt-slider" class="form-range" min="-5.00" max="0.00" step="0.01" value="0.00">
+                                <div class="d-flex align-items-center gap-2">
+    <button type="button" class="btn btn-sm btn-outline-secondary border-0" onclick="document.getElementById('volt-slider').stepDown(); document.getElementById('volt-slider').dispatchEvent(new Event('input'))">&#9664;</button>
+    <input type="range" id="volt-slider" class="form-range" min="-5.00" max="0.00"
+                                    step="0.01" value="0.00">
+    <button type="button" class="btn btn-sm btn-outline-secondary border-0" onclick="document.getElementById('volt-slider').stepUp(); document.getElementById('volt-slider').dispatchEvent(new Event('input'))">&#9654;</button>
+</div>
                                 <div class="text-end mt-1">
                                     <button class="btn btn-sm btn-outline-warning" id="fine-tune-down">-0.01V</button>
                                     <button class="btn btn-sm btn-outline-warning" id="fine-tune-up">+0.01V</button>
@@ -230,10 +248,11 @@
             <!-- GRAPH PANEL -->
             <div class="col-lg-6">
                 <div class="card shadow-sm h-100 graph-card">
-                    <div class="card-header text-center border-bottom-0 pt-3" style="background-color: transparent;">
-                        <span class="graph-card-title" style="color:#eeeeee; font-weight:600; font-size:0.95rem;">V₀ vs Frequency (ν) Graph</span>
+                    <div class="card-header text-center border-bottom-0 pt-3 bg-transparent">
+                        <span class="graph-card-title fw-bold text-white" style="font-size:0.95rem;">V₀ vs Frequency (ν)
+                            Graph</span>
                     </div>
-                    <div class="card-body p-3 d-flex align-items-center justify-content-center" style="background:#111111;">
+                    <div class="card-body p-3 d-flex align-items-center justify-content-center bg-white">
                         <canvas id="graphCanvas" width="500" height="350"></canvas>
                     </div>
                 </div>
@@ -242,13 +261,14 @@
             <!-- TABLE PANEL -->
             <div class="col-lg-6">
                 <div class="card shadow-sm h-100 graph-card">
-                    <div class="card-header text-center border-bottom-0 pt-3" style="background-color: transparent; border-bottom: 1px solid #333 !important;">
-                        <span style="color:#eeeeee; font-weight:600; font-size:0.95rem;">Observation Table</span>
+                    <div class="card-header text-center border-bottom-0 pt-3 bg-transparent"
+                        style="border-bottom: 1px solid #dee2e6 !important;">
+                        <span class="fw-bold text-white" style="font-size:0.95rem;">Observation Table</span>
                     </div>
-                    <div class="card-body p-0" style="background:#111111;">
+                    <div class="card-body p-0 bg-white">
                         <div class="table-responsive" style="max-height: 260px; overflow-y: auto;">
-                            <table id="obs-table" class="table table-hover text-center align-middle mb-0" style="background-color:#111111; color:#dddddd;">
-                                <thead class="table-dark">
+                            <table id="obs-table" class="table table-hover text-center align-middle mb-0">
+                                <thead class="table-dark text-white">
                                     <tr>
                                         <th>Sl.<br>No.</th>
                                         <th>Wavelength<br>λ (nm)</th>
@@ -260,7 +280,7 @@
                             </table>
                         </div>
                     </div>
-                    <div class="card-footer border-top-0 pb-3 text-center" style="background:#111111;">
+                    <div class="card-footer border-top-0 pb-3 text-center bg-transparent mt-auto">
                         <button id="add-reading" class="btn btn-primary btn-sm px-4 fw-bold">
                             Add to Graph
                         </button>
@@ -269,35 +289,17 @@
             </div>
         </div>
 
-        <!-- ACTIONS & PHYSICS REFERENCE -->
+        <!-- ACTIONS -->
         <div class="row g-4 mt-2">
             <div class="col-lg-12">
-                <div class="card shadow-sm border-0 p-3">
-                    <div class="row align-items-center">
-                        <div class="col-md-6 border-end">
-                            <h6 class="fw-bold mb-3 text-center border-bottom pb-2">Actions</h6>
-                            <div class="d-grid gap-2">
-                                <button onclick="calculatePlanck()" class="btn btn-success fw-bold py-2">
-                                    Calculate Planck's Constant (h) from Graph
-                                </button>
-                                <div class="row g-2">
-                                    <div class="col-6">
-                                        <button id="clear-data" class="btn btn-outline-danger w-100">Clear Data</button>
-                                    </div>
-                                    <div class="col-6">
-                                        <button id="download-pdf" class="btn btn-danger w-100">Download Report PDF</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 pl-4">
-                            <h6 class="fw-bold mb-2">Einstein's Photoelectric Equation:</h6>
-                            <span class="fs-5 d-block text-center mt-2 mb-2">$$eV_0 = h\nu - \Phi$$</span>
-                            <div class="text-muted small">
-                                The graph plots $V_0$ on the Y-axis and $\nu$ on the X-axis. This forms a straight line equation $y = mx + c$, where the slope $m = h/e$.<br>
-                                Calculate slope $m$ from the drawn line to find $h = m \cdot e$.
-                            </div>
-                        </div>
+                <div class="card shadow-sm border-0 p-3 text-center">
+                    <h6 class="fw-bold mb-3 border-bottom pb-2">Actions</h6>
+                    <div class="d-flex justify-content-center gap-2">
+                        <button onclick="calculatePlanck()" class="btn btn-success fw-bold py-2 shadow-sm px-4">
+                            Calculate Planck's Constant (h) from Graph
+                        </button>
+                        <button id="clear-data" class="btn btn-outline-danger shadow-sm px-4">Clear Graph Data</button>
+                        <button id="download-pdf" class="btn btn-danger shadow-sm px-4">Download Report PDF</button>
                     </div>
                 </div>
             </div>

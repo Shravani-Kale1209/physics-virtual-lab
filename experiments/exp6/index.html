@@ -283,7 +283,11 @@
                                 <label>Screen Distance D (cm)</label>
                                 <span class="badge badge-dark-custom" id="dist-badge">120.0 cm</span>
                             </div>
-                            <input type="range" id="distance-slider" class="form-range" min="80" max="250" step="1" value="120">
+                            <div class="d-flex align-items-center gap-2">
+    <button type="button" class="btn btn-sm btn-outline-secondary border-0" onclick="document.getElementById('distance-slider').stepDown(); document.getElementById('distance-slider').dispatchEvent(new Event('input'))">&#9664;</button>
+    <input type="range" id="distance-slider" class="form-range" min="80" max="250" step="1" value="120">
+    <button type="button" class="btn btn-sm btn-outline-secondary border-0" onclick="document.getElementById('distance-slider').stepUp(); document.getElementById('distance-slider').dispatchEvent(new Event('input'))">&#9654;</button>
+</div>
                         </div>
 
                         <div class="mb-3">
@@ -291,7 +295,11 @@
                                 <label>Hair Thickness a (µm)</label>
                                 <span class="badge badge-dark-custom" id="thick-badge">50 µm</span>
                             </div>
-                            <input type="range" id="thickness-slider" class="form-range" min="30" max="120" step="1" value="50">
+                            <div class="d-flex align-items-center gap-2">
+    <button type="button" class="btn btn-sm btn-outline-secondary border-0" onclick="document.getElementById('thickness-slider').stepDown(); document.getElementById('thickness-slider').dispatchEvent(new Event('input'))">&#9664;</button>
+    <input type="range" id="thickness-slider" class="form-range" min="30" max="120" step="1" value="50">
+    <button type="button" class="btn btn-sm btn-outline-secondary border-0" onclick="document.getElementById('thickness-slider').stepUp(); document.getElementById('thickness-slider').dispatchEvent(new Event('input'))">&#9654;</button>
+</div>
                         </div>
 
                         <div>
@@ -311,11 +319,11 @@
         <!-- DATA & PHYSICS REF ROW -->
         <div class="row g-4 align-items-start">
 
-            <div class="col-lg-7">
-                <div class="card shadow-sm border-0 p-3">
+            <div class="col-lg-5">
+                <div class="card shadow-sm border-0 p-3 h-100 d-flex flex-column">
                     <h5 class="fw-bold mb-3 text-center border-bottom pb-2">Observations (from Zoomed UI)</h5>
 
-                    <div class="table-responsive">
+                    <div class="table-responsive flex-grow-1">
                         <table id="obs-table" class="table table-hover text-center align-middle mb-0">
                             <thead class="table-custom-header">
                                 <tr>
@@ -335,42 +343,26 @@
                         Turn Laser ON, align the calipers, and click <strong>Record Reading</strong>.
                     </p>
 
-                    <div class="d-grid gap-2 mt-3">
-                        <button id="add-reading" class="btn btn-primary fw-bold" disabled>Record Reading</button>
-                        <div class="row g-2">
-                            <div class="col-6">
-                                <button id="clear-data" class="btn btn-outline-danger btn-sm w-100">Clear Table</button>
-                            </div>
-                            <div class="col-6">
-                                <button id="download-pdf" class="btn btn-danger btn-sm w-100 fw-bold">Download PDF</button>
-                            </div>
-                        </div>
-                        <button onclick="calcResult()" class="btn btn-success btn-lg mt-1 fw-bold">
-                            View Final Result
+                    <div class="card-footer border-top-0 pb-1 pt-3 text-center bg-transparent mt-auto">
+                        <button id="add-reading" class="btn btn-primary btn-sm px-4 fw-bold shadow-sm" disabled>
+                            Record Reading
                         </button>
                     </div>
                 </div>
             </div>
 
-            <div class="col-lg-5">
-                <div class="card shadow-sm border-0 p-3">
-                    <h5 class="fw-bold mb-3 text-center border-bottom pb-2">Physics Formulation</h5>
-
-                    <div class="physics-ref mb-3 shadow-sm text-center">
-                        <strong>Babinet's Principle</strong><br>
-                        Diffraction by a hair (thickness <strong>a</strong>) produces the identical intensity pattern as a single slit of width <strong>a</strong>.
-                    </div>
-
-                    <div class="physics-ref mb-3 shadow-sm text-center">
-                        <strong>First Minima Condition</strong><br>
-                        a · sin(θ) = 1 · λ<br>
-                        For small θ,  sin(θ) ≈ y / D<br><br>
-                        Total fringe spread (β = 2y):<br>
-                        <strong>a = (2 · λ · D) / β</strong>
-                    </div>
-
-                    <div class="alert alert-info py-2" style="font-size: 0.85rem; background:#f0f0f0 !important; border-color:#cccccc !important; color:#111 !important;">
-                        <strong>Instructions:</strong> Use the zoomed ruler to measure <strong>β</strong> (the distance between the two first-order dark fringes bounding the central bright spot).
+            <!-- Actions -->
+            <div class="col-lg-7">
+                <div class="card shadow-sm border-0 p-3 h-100 text-center">
+                    <h5 class="fw-bold mb-3 border-bottom pb-2">Actions</h5>
+                    <div class="d-flex flex-column justify-content-center h-100 gap-3 px-4">
+                        <button onclick="calcResult()" class="btn btn-success py-2 fw-bold shadow-sm">
+                            View Final Result
+                        </button>
+                        <div class="d-flex justify-content-center gap-3">
+                            <button id="clear-data" class="btn btn-outline-danger shadow-sm px-4">Clear Data</button>
+                            <button id="download-pdf" class="btn btn-danger shadow-sm px-4">Download Report PDF</button>
+                        </div>
                     </div>
                 </div>
             </div>
