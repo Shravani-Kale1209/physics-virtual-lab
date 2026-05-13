@@ -519,44 +519,31 @@ function calculateBandGap() {
 
     const out = document.getElementById('calculation-output');
     out.innerHTML = `
-        <hr class="my-4">
-        <div class="card result-card shadow overflow-hidden">
-            <div class="result-hero">
-                <div class="eg-label mb-1">Calculated Energy Band Gap</div>
-                <div class="eg-value">E<sub>g</sub> = ${Eg_calc.toFixed(3)} eV</div>
-                <div class="mt-3 d-flex justify-content-center gap-4" style="font-size:0.83rem;">
-                    <span style="color:#9ca3af;">Standard (Ge): <strong style="color:#fbbf24;">0.67 eV</strong></span>
-                    <span style="color:#9ca3af;">Error: <strong style="color:${errColor};">${pctErr.toFixed(1)} %</strong></span>
-                    <span style="color:#9ca3af;">Slope: <strong style="color:#a5f3fc;">${slope.toFixed(1)} K</strong></span>
+        <hr class="my-5 border-dark">
+        <div class="card border-dark rounded-0 p-4 bg-white">
+            <h3 class="text-uppercase fw-bold border-bottom pb-2 mb-4">Final Laboratory Report</h3>
+            <div class="row">
+                <div class="col-md-6 border-end">
+                    <h5 class="fw-bold">Governing Formulas</h5>
+                    <p class="fs-5 mt-3">$$E_g = 2k \\times \\text{slope}$$</p>
+                    <ul class="text-muted small mt-4">
+                        <li>$k = 8.617 \\times 10^{-5}$ eV/K</li>
+                        <li>Slope $= ${slope.toFixed(1)}$ K (from graph)</li>
+                        <li>Readings: ${observations.length}</li>
+                    </ul>
+                </div>
+                <div class="col-md-6 ps-4">
+                    <div class="bg-light border border-dark p-4 text-center">
+                        <h5 class="text-uppercase fw-bold mb-4">Experimental Results</h5>
+                        <p class="fs-4 mb-3 fw-bold">$E_g = ${Eg_calc.toFixed(3)}$ eV</p>
+                        <p class="fs-5 mb-0">Standard (Ge): <strong>0.67 eV</strong></p>
+                        <p class="fs-5 mb-0">Error: <strong style="color:${errColor};">${pctErr.toFixed(1)} %</strong></p>
+                    </div>
                 </div>
             </div>
-            <div class="p-4">
-                <div class="row g-4">
-                    <div class="col-md-5">
-                        <h6 class="fw-bold mb-2">Governing Formula</h6>
-                        <p>$$E_g = 2k \\times \\text{slope}$$</p>
-                        <ul class="text-muted" style="font-size:0.82rem; line-height:1.8;">
-                            <li>$k = 8.617 \\times 10^{-5}$ eV/K</li>
-                            <li>Slope $= ${slope.toFixed(1)}$ K (from graph)</li>
-                            <li>Readings: ${observations.length}</li>
-                        </ul>
-                    </div>
-                    <div class="col-md-7">
-                        <h6 class="fw-bold mb-2">Conclusion</h6>
-                        <p style="font-size:0.85rem; color:#374151; line-height:1.7;">
-                            The slope of $\\ln(R)$ vs $\\frac{1}{T}$ was
-                            <strong>${slope.toFixed(1)} K</strong>.
-                            Applying $E_g = 2k \\times \\text{slope}$ gives
-                            <strong>${Eg_calc.toFixed(3)} eV</strong>
-                            vs. the standard Ge value of <strong>0.67 eV</strong>
-                            (error ${pctErr.toFixed(1)} %).
-                            As temperature rises, thermal energy promotes electrons
-                            across the band gap, dramatically increasing carrier
-                            density and lowering resistance — exactly as the
-                            animation shows.
-                        </p>
-                    </div>
-                </div>
+            <div class="mt-4 p-4 border border-secondary bg-light">
+                <h6 class="text-uppercase fw-bold mb-2">Conclusion</h6>
+                <p class="mb-0">The slope of $\\ln(R)$ vs $\\frac{1}{T}$ was <strong>${slope.toFixed(1)} K</strong>. Applying $E_g = 2k \\times \\text{slope}$ gives <strong>${Eg_calc.toFixed(3)} eV</strong> vs. the standard Ge value of <strong>0.67 eV</strong> (error ${pctErr.toFixed(1)} %). As temperature rises, thermal energy promotes electrons across the band gap, dramatically increasing carrier density and lowering resistance — exactly as the animation shows.</p>
             </div>
         </div>`;
 

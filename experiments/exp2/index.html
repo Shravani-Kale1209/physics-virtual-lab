@@ -28,6 +28,7 @@
         body {
             background-color: #f4f6f9;
             color: #333;
+            --bs-body-line-height: 1;
         }
 
         .card {
@@ -92,7 +93,7 @@
                         </div>
                         <div class="d-flex align-items-center gap-3">
                             <button type="button" class="btn-slider-ctrl" onclick="document.getElementById('x-slider').stepDown(); document.getElementById('x-slider').dispatchEvent(new Event('input'))">&#9664;</button>
-                            <input type="range" id="x-slider" class="custom-dark-slider w-100" min="1" max="100" step="1" value="10">
+                            <input type="range" id="x-slider" class="custom-dark-slider w-100" min="1" max="100" step="1" value="10" style="line-height: 0;">
                             <button type="button" class="btn-slider-ctrl" onclick="document.getElementById('x-slider').stepUp(); document.getElementById('x-slider').dispatchEvent(new Event('input'))">&#9654;</button>
                         </div>
                     </div>
