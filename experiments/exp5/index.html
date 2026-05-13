@@ -10,6 +10,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
         window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
@@ -93,37 +94,7 @@
             font-family: 'Courier New', monospace;
         }
 
-        /* Custom slider styling */
-        .custom-grey-slider {
-            -webkit-appearance: none;
-            width: 100%;
-            background: transparent;
-        }
-        .custom-grey-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 22px; width: 12px;
-            border-radius: 2px;
-            background: #333333;
-            cursor: pointer;
-            margin-top: -8px;
-            border: 1px solid #111111;
-        }
-        .custom-grey-slider::-webkit-slider-runnable-track {
-            width: 100%; height: 6px; cursor: pointer;
-            background: linear-gradient(to right, #333333, #aaaaaa);
-            border: 1px solid #cccccc;
-            border-radius: 3px;
-        }
-        .custom-grey-slider::-moz-range-thumb {
-            height: 22px; width: 12px; border-radius: 2px;
-            background: #333333; cursor: pointer;
-            border: 1px solid #111111;
-        }
-        .custom-grey-slider::-moz-range-track {
-            height: 6px; cursor: pointer;
-            background: linear-gradient(to right, #333333, #aaaaaa);
-            border-radius: 3px;
-        }
+
     </style>
 </head>
 
@@ -182,10 +153,10 @@
                         </div>
                         <div class="d-flex align-items-center gap-2">
                             <button class="btn btn-dark btn-sm fw-bold" id="current-decrease">◀</button>
-                            <div class="d-flex align-items-center gap-2">
-    <button type="button" class="btn btn-sm btn-outline-secondary border-0" onclick="document.getElementById('current-slider').stepDown(); document.getElementById('current-slider').dispatchEvent(new Event('input'))">&#9664;</button>
-    <input type="range" id="current-slider" class="form-range custom-grey-slider" min="0" max="20" step="0.5" value="0">
-    <button type="button" class="btn btn-sm btn-outline-secondary border-0" onclick="document.getElementById('current-slider').stepUp(); document.getElementById('current-slider').dispatchEvent(new Event('input'))">&#9654;</button>
+                            <div class="d-flex align-items-center gap-3">
+    <button type="button" class="btn-slider-ctrl" onclick="document.getElementById('current-slider').stepDown(); document.getElementById('current-slider').dispatchEvent(new Event('input'))">&#9664;</button>
+    <input type="range" id="current-slider" class="custom-dark-slider" min="0" max="20" step="0.5" value="0">
+    <button type="button" class="btn-slider-ctrl" onclick="document.getElementById('current-slider').stepUp(); document.getElementById('current-slider').dispatchEvent(new Event('input'))">&#9654;</button>
 </div>
                             <button class="btn btn-dark btn-sm fw-bold" id="current-increase">▶</button>
                         </div>
@@ -197,10 +168,10 @@
                         </div>
                         <div class="d-flex align-items-center gap-2">
                             <button class="btn btn-dark btn-sm fw-bold" id="magnetic-decrease">◀</button>
-                            <div class="d-flex align-items-center gap-2">
-    <button type="button" class="btn btn-sm btn-outline-secondary border-0" onclick="document.getElementById('magnetic-slider').stepDown(); document.getElementById('magnetic-slider').dispatchEvent(new Event('input'))">&#9664;</button>
-    <input type="range" id="magnetic-slider" class="form-range custom-grey-slider" min="0" max="1.0" step="0.05" value="0">
-    <button type="button" class="btn btn-sm btn-outline-secondary border-0" onclick="document.getElementById('magnetic-slider').stepUp(); document.getElementById('magnetic-slider').dispatchEvent(new Event('input'))">&#9654;</button>
+                            <div class="d-flex align-items-center gap-3">
+    <button type="button" class="btn-slider-ctrl" onclick="document.getElementById('magnetic-slider').stepDown(); document.getElementById('magnetic-slider').dispatchEvent(new Event('input'))">&#9664;</button>
+    <input type="range" id="magnetic-slider" class="custom-dark-slider" min="0" max="1.0" step="0.05" value="0">
+    <button type="button" class="btn-slider-ctrl" onclick="document.getElementById('magnetic-slider').stepUp(); document.getElementById('magnetic-slider').dispatchEvent(new Event('input'))">&#9654;</button>
 </div>
                             <button class="btn btn-dark btn-sm fw-bold" id="magnetic-increase">▶</button>
                         </div>
@@ -214,12 +185,12 @@
 
             <!-- Observation Table -->
             <div class="col-lg-5">
-                <div class="card shadow-sm border-0 p-3 h-100 d-flex flex-column">
+                <div class="card shadow-sm border-0 p-3 d-flex flex-column">
                     <h5 class="fw-bold mb-3 text-center border-bottom pb-2">Observations</h5>
 
-                    <div class="table-responsive flex-grow-1">
-                        <table id="obs-table" class="table table-hover text-center align-middle mb-0">
-                            <thead class="table-dark text-white">
+                    <div class="obs-table-container">
+                        <table id="obs-table" class="table text-center mb-0">
+                            <thead>
                                 <tr>
                                     <th>#</th>
                                     <th>Current (mA)</th>
@@ -243,22 +214,35 @@
                 </div>
             </div>
 
-            <!-- Actions -->
+            <!-- Graph: VH vs (I*B) -->
             <div class="col-lg-7">
-                <div class="card shadow-sm border-0 p-3 h-100 text-center">
-                    <h5 class="fw-bold mb-3 border-bottom pb-2">Actions</h5>
-                    <div class="d-flex flex-column justify-content-center h-100 gap-3 px-4">
-                        <button onclick="calculateHallEffect()" class="btn btn-success py-2 fw-bold shadow-sm">
-                            Calculate Hall Coefficient (R<sub>H</sub>)
-                        </button>
-                        <div class="d-flex justify-content-center gap-3">
-                            <button id="clear-data" class="btn btn-outline-danger shadow-sm px-4">Clear Data</button>
-                            <button id="download-pdf" class="btn btn-danger shadow-sm px-4">Download Report PDF</button>
-                        </div>
+                <div class="card shadow-sm border-0 p-3 h-100">
+                    <h5 class="fw-bold mb-3 text-center border-bottom pb-2">Graph: Hall Voltage (V<sub>H</sub>) vs (I &times; B)</h5>
+                    <div style="position: relative; height: 285px;">
+                        <canvas id="hallChart"></canvas>
                     </div>
+                    <p class="text-muted small text-center mt-2 mb-0">
+                        A straight line indicates linear relationship. Slope represents R<sub>H</sub> / t.
+                    </p>
                 </div>
             </div>
 
+        </div>
+
+        <!-- ACTIONS ROW -->
+        <div class="row g-4 mt-2">
+            <div class="col-lg-12">
+                <div class="card shadow-sm border-0 p-3 text-center">
+                    <h6 class="fw-bold mb-3 border-bottom pb-2">Actions</h6>
+                    <div class="d-flex justify-content-center gap-2">
+                        <button onclick="calculateHallEffect()" class="btn btn-success fw-bold py-2 shadow-sm px-4">
+                            Calculate Hall Coefficient (R<sub>H</sub>)
+                        </button>
+                        <button id="clear-data" class="btn btn-outline-danger shadow-sm px-4">Clear Data</button>
+                        <button id="download-pdf" class="btn btn-danger shadow-sm px-4">Download Report PDF</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Result Output -->

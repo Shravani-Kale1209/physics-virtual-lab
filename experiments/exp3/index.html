@@ -20,7 +20,11 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
         body {
             font-family: 'Inter', Arial, sans-serif;
@@ -34,6 +38,7 @@
             font-weight: 700;
             color: #111111;
         }
+
         .page-subtitle {
             color: #555555;
             font-size: 0.9rem;
@@ -43,9 +48,10 @@
         .card {
             border: 1px solid #cccccc !important;
             border-radius: 12px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.07);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.07);
             background: #fff;
         }
+
         .card-title {
             font-weight: 700;
             font-size: 0.95rem;
@@ -68,6 +74,7 @@
             align-items: center;
             gap: 6px;
         }
+
         .therm-tube {
             width: 20px;
             height: 120px;
@@ -77,31 +84,35 @@
             position: relative;
             overflow: hidden;
         }
+
         .therm-mercury {
             position: absolute;
             bottom: 0;
             left: 0;
             right: 0;
             background: linear-gradient(to top, #333333, #666666);
-            transition: height 0.5s cubic-bezier(.4,0,.2,1);
+            transition: height 0.5s cubic-bezier(.4, 0, .2, 1);
             border-radius: 0 0 8px 8px;
         }
+
         .therm-bulb {
             width: 32px;
             height: 32px;
             border-radius: 50%;
             border: 2.5px solid #888888;
             background: radial-gradient(circle at 38% 35%, #555555, #111111);
-            box-shadow: 0 0 8px rgba(0,0,0,0.3);
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
             margin-top: -2px;
             transition: box-shadow 0.5s ease;
         }
+
         .therm-label {
             font-size: 0.7rem;
             font-weight: 600;
             color: #555555;
             text-align: center;
         }
+
         .temp-readout {
             font-size: 1.25rem;
             font-weight: 700;
@@ -109,6 +120,7 @@
             text-align: center;
             font-variant-numeric: tabular-nums;
         }
+
         .celsius-readout {
             font-size: 0.78rem;
             color: #777777;
@@ -122,8 +134,9 @@
             padding: 14px 20px;
             text-align: center;
             color: #fff;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
+
         .resistance-panel .r-label {
             font-size: 0.65rem;
             letter-spacing: 1.5px;
@@ -131,6 +144,7 @@
             color: #999999;
             margin-bottom: 4px;
         }
+
         .resistance-panel .r-value {
             font-size: 2rem;
             font-weight: 700;
@@ -138,6 +152,7 @@
             font-family: 'Courier New', monospace;
             line-height: 1;
         }
+
         .resistance-panel .r-unit {
             font-size: 0.75rem;
             color: #999999;
@@ -158,6 +173,7 @@
             color: #111111;
             transition: all 0.3s ease;
         }
+
         .carrier-dot {
             width: 10px;
             height: 10px;
@@ -173,33 +189,9 @@
             border: 1.5px solid #cccccc;
         }
 
-        input[type=range] {
-            -webkit-appearance: none;
-            width: 100%;
-            height: 6px;
-            border-radius: 3px;
-            outline: none;
-            cursor: pointer;
-            background: linear-gradient(to right, #333333, #aaaaaa);
-            margin: 8px 0;
-        }
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            background: #fff;
-            border: 3px solid #111111;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-            cursor: grab;
-        }
-        input[type=range]:active::-webkit-slider-thumb { cursor: grabbing; }
 
-        /* ── Observation Table ── */
-        .obs-table-wrap {
-            height: 260px;
-            overflow-y: auto;
-        }
+
+
         #obs-table thead th {
             background: #111111;
             color: #fff;
@@ -209,9 +201,19 @@
             top: 0;
             z-index: 2;
         }
-        #obs-table tbody tr { transition: background 0.2s; }
-        #obs-table tbody tr:hover { background: #f0f0f0; }
-        #obs-table td { font-size: 0.82rem; padding: 5px 8px; }
+
+        #obs-table tbody tr {
+            transition: background 0.2s;
+        }
+
+        #obs-table tbody tr:hover {
+            background: #f0f0f0;
+        }
+
+        #obs-table td {
+            font-size: 0.82rem;
+            padding: 5px 8px;
+        }
 
         /* ── Buttons ── */
         .btn-record {
@@ -221,11 +223,13 @@
             font-weight: 600;
             border-radius: 10px;
         }
+
         .btn-record:hover {
             background: #333333;
             color: #fff;
             transform: translateY(-1px);
         }
+
         .btn-calc {
             background: #111111;
             border: none;
@@ -233,11 +237,13 @@
             font-weight: 600;
             border-radius: 10px;
         }
+
         .btn-calc:hover {
             background: #333333;
             color: #fff;
             transform: translateY(-1px);
         }
+
         .btn-pdf {
             background: transparent;
             border: 2px solid #111111;
@@ -245,11 +251,13 @@
             font-weight: 600;
             border-radius: 10px;
         }
+
         .btn-pdf:hover {
             background: #111111;
             color: #fff;
             transform: translateY(-1px);
         }
+
         .btn-clear {
             background: transparent;
             border: 1.5px solid #888888;
@@ -257,12 +265,16 @@
             border-radius: 10px;
             font-size: 0.85rem;
         }
+
         .btn-clear:hover {
             background: #f0f0f0;
             border-color: #555555;
             color: #333333;
         }
-        .btn { transition: all 0.18s ease; }
+
+        .btn {
+            transition: all 0.18s ease;
+        }
 
         /* ── Chart area ── */
         .chart-wrap {
@@ -278,6 +290,7 @@
             color: #fff;
             text-align: center;
         }
+
         .formula-box .formula-label {
             font-size: 0.7rem;
             text-transform: uppercase;
@@ -285,27 +298,56 @@
             color: #999999;
             margin-bottom: 8px;
         }
-        .formula-box .formula-eq { font-size: 1.3rem; color: #ffffff; }
-        .formula-box .formula-note { font-size: 0.78rem; color: #aaaaaa; margin-top: 8px; }
+
+        .formula-box .formula-eq {
+            font-size: 1.3rem;
+            color: #ffffff;
+        }
+
+        .formula-box .formula-note {
+            font-size: 0.78rem;
+            color: #aaaaaa;
+            margin-top: 8px;
+        }
 
         /* ── Result card ── */
-        .result-card { border-radius: 14px; overflow: hidden; }
+        .result-card {
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
         .result-hero {
             background: linear-gradient(135deg, #222222, #111111);
             padding: 24px;
             text-align: center;
             color: #fff;
         }
-        .result-hero .eg-value { font-size: 2.8rem; font-weight: 700; color: #ffffff; }
-        .result-hero .eg-label { font-size: 0.85rem; color: #aaaaaa; }
+
+        .result-hero .eg-value {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .result-hero .eg-label {
+            font-size: 0.85rem;
+            color: #aaaaaa;
+        }
 
         .band-card:hover {
-            box-shadow: 0 6px 24px rgba(0,0,0,0.15);
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
         }
 
         @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 0 6px rgba(0,0,0,0.2); }
-            50%       { box-shadow: 0 0 14px rgba(0,0,0,0.4); }
+
+            0%,
+            100% {
+                box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
+            }
+
+            50% {
+                box-shadow: 0 0 14px rgba(0, 0, 0, 0.4);
+            }
         }
     </style>
 </head>
@@ -371,19 +413,25 @@
                                     <label class="fw-bold" style="font-size:0.85rem; color:#111111;">Temperature</label>
                                     <span class="badge text-bg-danger px-3 py-2 fs-6" id="temp-badge">300 K</span>
                                 </div>
-                                <div class="d-flex align-items-center gap-2">
-    <button type="button" class="btn btn-sm btn-outline-secondary border-0" onclick="document.getElementById('temp-slider').stepDown(); document.getElementById('temp-slider').dispatchEvent(new Event('input'))">&#9664;</button>
-    <input type="range" id="temp-slider" min="300" max="500" step="5" value="300">
-    <button type="button" class="btn btn-sm btn-outline-secondary border-0" onclick="document.getElementById('temp-slider').stepUp(); document.getElementById('temp-slider').dispatchEvent(new Event('input'))">&#9654;</button>
-</div>
+                                <div class="d-flex align-items-center gap-3">
+                                    <button type="button" class="btn-slider-ctrl"
+                                        onclick="document.getElementById('temp-slider').stepDown(); document.getElementById('temp-slider').dispatchEvent(new Event('input'))">&#9664;</button>
+                                    <input type="range" id="temp-slider" class="custom-dark-slider" min="300" max="500"
+                                        step="5" value="300">
+                                    <button type="button" class="btn-slider-ctrl"
+                                        onclick="document.getElementById('temp-slider').stepUp(); document.getElementById('temp-slider').dispatchEvent(new Event('input'))">&#9654;</button>
+                                </div>
                                 <div class="d-flex justify-content-between" style="font-size:0.7rem; color:#777777;">
                                     <span>300 K (27°C)</span><span>500 K (227°C)</span>
                                 </div>
                             </div>
 
                             <div class="bg-white p-3 rounded shadow-sm border text-center w-100 mt-2">
-                                <h6 class="text-muted mb-2 text-uppercase" style="font-size:0.75rem; letter-spacing:1px;">Resistance</h6>
-                                <div class="fs-2 fw-bold" id="r-meter" style="font-family:'Courier New',monospace; line-height:1.2; color:#111111;">---</div>
+                                <h6 class="text-muted mb-2 text-uppercase"
+                                    style="font-size:0.75rem; letter-spacing:1px;">Resistance</h6>
+                                <div class="fs-2 fw-bold" id="r-meter"
+                                    style="font-family:'Courier New',monospace; line-height:1.2; color:#111111;">---
+                                </div>
                                 <small class="text-muted">kΩ</small>
                             </div>
                         </div>
@@ -398,8 +446,8 @@
                 <div class="card p-3 h-100 d-flex flex-column">
                     <span class="card-title mb-3">📋 Observations</span>
 
-                    <div class="obs-table-wrap mb-3">
-                        <table id="obs-table" class="table table-sm table-hover text-center align-middle w-100">
+                    <div class="obs-table-container mb-3 flex-grow-1" style="height: auto;">
+                        <table id="obs-table" class="table text-center mb-0">
                             <thead>
                                 <tr>
                                     <th>#</th>
@@ -424,6 +472,21 @@
 
         </div><!-- /row -->
 
+        <!-- Graph Row -->
+        <div class="row g-4 mt-2">
+            <div class="col-lg-12">
+                <div class="card p-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="card-title">📈 Graph: ln(R) vs 1/T</span>
+                        <span class="badge text-bg-secondary" id="points-badge">0 points</span>
+                    </div>
+                    <div class="chart-wrap">
+                        <canvas id="bandGapChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Actions Row -->
         <div class="row g-4 mt-2">
             <div class="col-lg-12">
@@ -438,22 +501,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Graph Row -->
-        <div class="row g-4 mt-2">
-            <div class="col-lg-12">
-                <div class="card p-3">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="card-title">📈 Graph: ln(R) vs 1/T</span>
-                        <span class="badge text-bg-secondary" id="points-badge">0 points</span>
-                    </div>
-                    <div class="chart-wrap">
-                        <canvas id="bandGapChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
         </div>
 
         <!-- Calculation output -->

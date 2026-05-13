@@ -5,24 +5,24 @@
    ===================================================================== */
 
 /* ── Constants ────────────────────────────────────────────────────── */
-const k_eV    = 8.617e-5;
+const k_eV = 8.617e-5;
 const Eg_true = 0.67;        // Germanium band gap [eV]
 
 /* ── DOM refs ─────────────────────────────────────────────────────── */
-const tempSlider   = document.getElementById('temp-slider');
-const tempBadge    = document.getElementById('temp-badge');
-const tempReadout  = document.getElementById('temp-readout');
-const celsiusOut   = document.getElementById('celsius-readout');
-const rMeter       = document.getElementById('r-meter');
+const tempSlider = document.getElementById('temp-slider');
+const tempBadge = document.getElementById('temp-badge');
+const tempReadout = document.getElementById('temp-readout');
+const celsiusOut = document.getElementById('celsius-readout');
+const rMeter = document.getElementById('r-meter');
 const thermMercury = document.getElementById('therm-mercury');
-const thermBulb    = document.getElementById('therm-bulb');
+const thermBulb = document.getElementById('therm-bulb');
 const carrierCount = document.getElementById('carrier-count');
-const pointsBadge  = document.getElementById('points-badge');
-const obsBody      = document.getElementById('obs-body');
-const addBtn       = document.getElementById('add-reading');
-const clearBtn     = document.getElementById('clear-data');
-const bandCanvas   = document.getElementById('bandCanvas');
-const bCtx         = bandCanvas.getContext('2d');
+const pointsBadge = document.getElementById('points-badge');
+const obsBody = document.getElementById('obs-body');
+const addBtn = document.getElementById('add-reading');
+const clearBtn = document.getElementById('clear-data');
+const bandCanvas = document.getElementById('bandCanvas');
+const bCtx = bandCanvas.getContext('2d');
 
 let observations = [];
 let animT = 300;
@@ -30,7 +30,7 @@ let animTick = 0;
 
 /* ── Polyfill roundRect for older Chrome ─────────────────────────── */
 if (!CanvasRenderingContext2D.prototype.roundRect) {
-    CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+    CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
         const rad = Array.isArray(r) ? r[0] : r;
         this.beginPath();
         this.moveTo(x + rad, y);
@@ -51,9 +51,9 @@ function sizeCanvas() {
     /* Try multiple methods to get the true pixel width */
     const rect = bandCanvas.getBoundingClientRect();
     const w = (rect && rect.width > 10) ? rect.width
-              : bandCanvas.parentElement ? bandCanvas.parentElement.clientWidth
-              : 600;
-    bandCanvas.width  = Math.round(w);
+        : bandCanvas.parentElement ? bandCanvas.parentElement.clientWidth
+            : 600;
+    bandCanvas.width = Math.round(w);
     bandCanvas.height = 230;
 }
 window.addEventListener('resize', () => { sizeCanvas(); spawnElectrons(); });
@@ -76,8 +76,8 @@ function bandLayout() {
     const pad = 14, zH = (H - 2 * pad) / 3;
     return {
         W, H, pad, zH,
-        cbTop: pad,           cbBot: pad + zH,
-        gbTop: pad + zH,      gbBot: pad + 2 * zH,
+        cbTop: pad, cbBot: pad + zH,
+        gbTop: pad + zH, gbBot: pad + 2 * zH,
         vbTop: pad + 2 * zH, vbBot: H - pad
     };
 }
@@ -160,8 +160,8 @@ function tickElectrons() {
             if (animTick % 40 === 0) {
                 const drift = (Math.random() - 0.5) * 10;
                 const newBase = e.baseY + drift;
-                if (e.band === 'valence')    e.baseY = Math.max(L.vbTop + 8, Math.min(L.vbBot - 8, newBase));
-                else                          e.baseY = Math.max(L.cbTop + 8, Math.min(L.cbBot - 8, newBase));
+                if (e.band === 'valence') e.baseY = Math.max(L.vbTop + 8, Math.min(L.vbBot - 8, newBase));
+                else e.baseY = Math.max(L.cbTop + 8, Math.min(L.cbBot - 8, newBase));
             }
 
             e.trail = [];
@@ -304,7 +304,7 @@ function drawBands() {
         /* Glow shadow for CB electrons */
         if (e.band === 'conduction' || e.jumping) {
             bCtx.save();
-            bCtx.shadowBlur  = 12;
+            bCtx.shadowBlur = 12;
             bCtx.shadowColor = e.jumping ? '#fbbf24' : '#3b82f6';
             bCtx.beginPath();
             bCtx.arc(e.x, e.y, 6, 0, Math.PI * 2);
@@ -374,14 +374,14 @@ function animLoop() {
    UPDATE SIMULATION UI
    ══════════════════════════════════════════════════════════════════ */
 function updateSimulation() {
-    const T  = parseInt(tempSlider.value);
-    animT    = T;
-    const t  = (T - 300) / 200;
+    const T = parseInt(tempSlider.value);
+    animT = T;
+    const t = (T - 300) / 200;
 
-    tempBadge.textContent   = T + ' K';
+    tempBadge.textContent = T + ' K';
     tempReadout.textContent = T + ' K';
-    celsiusOut.textContent  = (T - 273) + ' °C';
-    rMeter.textContent      = calcResistance(T, false).toFixed(2);
+    celsiusOut.textContent = (T - 273) + ' °C';
+    rMeter.textContent = calcResistance(T, false).toFixed(2);
 
     /* Thermometer */
     thermMercury.style.height = (t * 100) + '%';
@@ -495,8 +495,8 @@ function updateChart() {
 
 function linreg(pts) {
     const n = pts.length;
-    const sx  = pts.reduce((s, p) => s + p.x, 0);
-    const sy  = pts.reduce((s, p) => s + p.y, 0);
+    const sx = pts.reduce((s, p) => s + p.x, 0);
+    const sy = pts.reduce((s, p) => s + p.y, 0);
     const sxy = pts.reduce((s, p) => s + p.x * p.y, 0);
     const sx2 = pts.reduce((s, p) => s + p.x * p.x, 0);
     const slope = (n * sxy - sx * sy) / (n * sx2 - sx * sx);
@@ -513,9 +513,9 @@ function calculateBandGap() {
     }
     const pts = observations.map(o => ({ x: 1 / o.T, y: Math.log(o.R) }));
     const { slope } = linreg(pts);
-    const Eg_calc   = 2 * k_eV * slope;
-    const pctErr    = Math.abs((Eg_calc - Eg_true) / Eg_true * 100);
-    const errColor  = pctErr < 10 ? '#4ade80' : '#f87171';
+    const Eg_calc = 2 * k_eV * slope;
+    const pctErr = Math.abs((Eg_calc - Eg_true) / Eg_true * 100);
+    const errColor = pctErr < 10 ? '#4ade80' : '#f87171';
 
     const out = document.getElementById('calculation-output');
     out.innerHTML = `
@@ -615,7 +615,7 @@ document.getElementById('download-pdf').addEventListener('click', () => {
     doc.text('Standard Value (Ge) = 0.67 eV', 20, y + 16);
 
     if (observations.length >= 3) {
-        const pts  = observations.map(o => ({ x: 1 / o.T, y: Math.log(o.R) }));
+        const pts = observations.map(o => ({ x: 1 / o.T, y: Math.log(o.R) }));
         const { slope } = linreg(pts);
         const Eg = 2 * k_eV * slope;
         doc.setTextColor(30, 80, 160);

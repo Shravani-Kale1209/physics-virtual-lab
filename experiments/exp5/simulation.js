@@ -18,6 +18,105 @@ const elementalCharge = 1.602e-19; // Elemental charge in Coulombs
 const sampleThickness = 1e-3; // Thickness in meters (1 millimeter)
 const carrierConcentration = 5e20; // Number of charge carriers per cubic meter
 
+/* Hall Effect Chart (VH vs I*B) */
+const chartCtx = document.getElementById('hallChart').getContext('2d');
+const hallChart = new Chart(chartCtx, {
+    data: {
+        datasets: [
+            {
+                type: 'scatter',
+                label: 'Recorded Readings',
+                data: [],
+                backgroundColor: 'rgba(220, 53, 69, 0.85)',
+                pointRadius: 7,
+                pointHoverRadius: 9,
+                order: 2
+            },
+            {
+                type: 'line',
+                label: 'Linear Fit (Trend)',
+                data: [],
+                borderColor: 'rgba(13, 110, 253, 0.75)',
+                borderDash: [6, 4],
+                borderWidth: 2,
+                pointRadius: 0,
+                fill: false,
+                tension: 0,
+                order: 1
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 300 },
+        plugins: {
+            legend: { position: 'top', labels: { usePointStyle: true, font: { size: 11 } } },
+            tooltip: {
+                callbacks: {
+                    label: ctx => ctx.dataset.label === 'Recorded Readings'
+                        ? `V_H = ${ctx.parsed.y.toFixed(2)} mV @ I*B = ${ctx.parsed.x.toFixed(2)} mA·T`
+                        : null
+                }
+            }
+        },
+        scales: {
+            x: {
+                title: { display: true, text: 'I × B (mA·T)', font: { size: 12, weight: 'bold' } },
+                grid: { color: 'rgba(0,0,0,0.06)' }
+            },
+            y: {
+                title: { display: true, text: 'Hall Voltage V_H (mV)', font: { size: 12, weight: 'bold' } },
+                grid: { color: 'rgba(0,0,0,0.06)' }
+            }
+        }
+    }
+});
+
+function updateChart() {
+    if (observations.length === 0) {
+        hallChart.data.datasets[0].data = [];
+        hallChart.data.datasets[1].data = [];
+        hallChart.update();
+        return;
+    }
+
+    // Scatter points
+    hallChart.data.datasets[0].data = observations.map(o => ({
+        x: parseFloat(o.i) * parseFloat(o.b),
+        y: parseFloat(o.vh)
+    }));
+
+    // Linear regression for trendline
+    const n = observations.length;
+    if (n >= 2) {
+        const xs = observations.map(o => parseFloat(o.i) * parseFloat(o.b));
+        const ys = observations.map(o => parseFloat(o.vh));
+        const sumX = xs.reduce((a, b) => a + b, 0);
+        const sumY = ys.reduce((a, b) => a + b, 0);
+        const sumXY = xs.reduce((s, x, i) => s + x * ys[i], 0);
+        const sumX2 = xs.reduce((s, x) => s + x * x, 0);
+        const den = n * sumX2 - sumX * sumX;
+        
+        if (den !== 0) {
+            const slope = (n * sumXY - sumX * sumY) / den;
+            const intercept = (sumY - slope * sumX) / n;
+            const minX = Math.min(...xs);
+            const maxX = Math.max(...xs);
+            hallChart.data.datasets[1].data = [
+                { x: minX, y: slope * minX + intercept },
+                { x: maxX, y: slope * maxX + intercept }
+            ];
+        }
+    } else {
+        hallChart.data.datasets[1].data = [];
+    }
+    
+    hallChart.update();
+}
+
+
+
 // Animation Loop for Fluid Electron Flow
 function animateElectrons() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -127,6 +226,9 @@ function renderTable() {
     obsBody.innerHTML = observations.map((obs, index) => `
         <tr><td>${index + 1}</td><td>${obs.i}</td><td>${obs.b}</td><td>${obs.vh}</td></tr>
     `).join('');
+    const hint = document.getElementById("empty-hint");
+    if (hint) hint.style.display = observations.length ? "none" : "block";
+    updateChart();
 }
 
 function formatScientificNotation(value, unit) {

@@ -35,6 +35,96 @@ let observations = [];
 let animFrameId = null;
 let noiseOffset = 0;  // for subtle beam flicker
 
+// ─── DIVERGENCE CHART ────────────────────────────────────────────────────────
+const divCtx = document.getElementById('divergenceChart').getContext('2d');
+const divergenceChart = new Chart(divCtx, {
+    data: {
+        datasets: [
+            {
+                type: 'scatter',
+                label: 'Recorded Readings',
+                data: [],
+                backgroundColor: 'rgba(220, 53, 69, 0.85)',
+                pointRadius: 7,
+                pointHoverRadius: 9,
+                order: 2
+            },
+            {
+                type: 'line',
+                label: 'Linear Fit (Trend)',
+                data: [],
+                borderColor: 'rgba(13, 110, 253, 0.75)',
+                borderDash: [6, 4],
+                borderWidth: 2,
+                pointRadius: 0,
+                fill: false,
+                tension: 0,
+                order: 1
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 300 },
+        plugins: {
+            legend: { position: 'top', labels: { usePointStyle: true, font: { size: 11 } } },
+            tooltip: {
+                callbacks: {
+                    label: ctx => ctx.dataset.label === 'Recorded Readings'
+                        ? `D = ${ctx.parsed.y.toFixed(4)} mm  @ ${ctx.parsed.x} cm`
+                        : null
+                }
+            }
+        },
+        scales: {
+            x: {
+                title: { display: true, text: 'Distance (cm)', font: { size: 12, weight: 'bold' } },
+                grid: { color: 'rgba(0,0,0,0.06)' }
+            },
+            y: {
+                title: { display: true, text: 'Beam Diameter (mm)', font: { size: 12, weight: 'bold' } },
+                grid: { color: 'rgba(0,0,0,0.06)' }
+            }
+        }
+    }
+});
+
+function updateChart() {
+    if (observations.length === 0) {
+        divergenceChart.data.datasets[0].data = [];
+        divergenceChart.data.datasets[1].data = [];
+        divergenceChart.update();
+        return;
+    }
+
+    // Scatter points
+    divergenceChart.data.datasets[0].data = observations.map(o => ({ x: parseFloat(o.d), y: parseFloat(o.dia) }));
+
+    // Linear regression for trendline
+    const n = observations.length;
+    if (n >= 2) {
+        const xs = observations.map(o => parseFloat(o.d));
+        const ys = observations.map(o => parseFloat(o.dia));
+        const sumX = xs.reduce((a, b) => a + b, 0);
+        const sumY = ys.reduce((a, b) => a + b, 0);
+        const sumXY = xs.reduce((s, x, i) => s + x * ys[i], 0);
+        const sumX2 = xs.reduce((s, x) => s + x * x, 0);
+        const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+        const intercept = (sumY - slope * sumX) / n;
+        const minX = Math.min(...xs);
+        const maxX = Math.max(...xs);
+        divergenceChart.data.datasets[1].data = [
+            { x: minX, y: slope * minX + intercept },
+            { x: maxX, y: slope * maxX + intercept }
+        ];
+    } else {
+        divergenceChart.data.datasets[1].data = [];
+    }
+
+    divergenceChart.update();
+}
+
 // Wavelength → colour map (nm)
 const WAVELENGTH_COLORS = {
     405: { r: 180, g: 0, b: 255, name: "Violet 405 nm" },
@@ -394,6 +484,7 @@ function renderTable() {
   `).join("");
     const hint = document.getElementById("empty-hint");
     if (hint) hint.style.display = observations.length ? "none" : "block";
+    updateChart();
 }
 
 // ─── DIVERGENCE CALCULATION ──────────────────────────────────────────────────
@@ -524,6 +615,23 @@ document.getElementById("download-pdf").addEventListener("click", async function
         doc.setTextColor(30, 80, 160);
         doc.text(`[Computed] Divergence \u03B8 = ${th_mrad} mrad`, 20, y + 36);
     }
+
+    // ── Embed the chart image ──
+    try {
+        const chartCanvas = document.getElementById('divergenceChart');
+        const chartImg = chartCanvas.toDataURL('image/png');
+        const pageH = doc.internal.pageSize.getHeight();
+        const currentY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 55 : y + 55;
+        // Add new page if not enough space
+        if (currentY + 90 > pageH) doc.addPage();
+        const imgY = currentY + 10 > pageH ? 20 : currentY + 10;
+        doc.addPage();
+        doc.setFont('helvetica', 'bold').setFontSize(11).setTextColor(0);
+        doc.text('Graph: Beam Diameter vs Distance', PW / 2, 20, { align: 'center' });
+        doc.addImage(chartImg, 'PNG', 15, 28, PW - 30, 100);
+        doc.setFont('helvetica', 'normal').setFontSize(9).setTextColor(100);
+        doc.text('Red dots = recorded readings.  Dashed line = linear fit (divergence trend).', PW / 2, 135, { align: 'center' });
+    } catch (e) { /* chart embed optional */ }
 
     doc.save("Laser_Divergence_Report.pdf");
 });

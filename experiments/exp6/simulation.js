@@ -35,6 +35,103 @@ let observations = [];
 let animFrameId = null;
 let noiseOffset = 0;
 
+/* Diffraction Chart (β vs D) */
+const chartCtx = document.getElementById('hairChart').getContext('2d');
+const hairChart = new Chart(chartCtx, {
+    data: {
+        datasets: [
+            {
+                type: 'scatter',
+                label: 'Recorded Readings',
+                data: [],
+                backgroundColor: 'rgba(220, 53, 69, 0.85)',
+                pointRadius: 7,
+                pointHoverRadius: 9,
+                order: 2
+            },
+            {
+                type: 'line',
+                label: 'Linear Fit (Trend)',
+                data: [],
+                borderColor: 'rgba(13, 110, 253, 0.75)',
+                borderDash: [6, 4],
+                borderWidth: 2,
+                pointRadius: 0,
+                fill: false,
+                tension: 0,
+                order: 1
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 300 },
+        plugins: {
+            legend: { position: 'top', labels: { usePointStyle: true, font: { size: 11 } } },
+            tooltip: {
+                callbacks: {
+                    label: ctx => ctx.dataset.label === 'Recorded Readings'
+                        ? `β = ${ctx.parsed.y.toFixed(2)} mm @ D = ${ctx.parsed.x.toFixed(1)} cm`
+                        : null
+                }
+            }
+        },
+        scales: {
+            x: {
+                title: { display: true, text: 'Screen Distance D (cm)', font: { size: 12, weight: 'bold' } },
+                grid: { color: 'rgba(0,0,0,0.06)' }
+            },
+            y: {
+                title: { display: true, text: 'Fringe Width β (mm)', font: { size: 12, weight: 'bold' } },
+                grid: { color: 'rgba(0,0,0,0.06)' }
+            }
+        }
+    }
+});
+
+function updateChart() {
+    if (observations.length === 0) {
+        hairChart.data.datasets[0].data = [];
+        hairChart.data.datasets[1].data = [];
+        hairChart.update();
+        return;
+    }
+
+    // Scatter points
+    hairChart.data.datasets[0].data = observations.map(o => ({
+        x: o.d,
+        y: o.beta
+    }));
+
+    // Linear regression for trendline
+    const n = observations.length;
+    if (n >= 2) {
+        const xs = observations.map(o => o.d);
+        const ys = observations.map(o => o.beta);
+        const sumX = xs.reduce((a, b) => a + b, 0);
+        const sumY = ys.reduce((a, b) => a + b, 0);
+        const sumXY = xs.reduce((s, x, i) => s + x * ys[i], 0);
+        const sumX2 = xs.reduce((s, x) => s + x * x, 0);
+        const den = n * sumX2 - sumX * sumX;
+        
+        if (den !== 0) {
+            const slope = (n * sumXY - sumX * sumY) / den;
+            const intercept = (sumY - slope * sumX) / n;
+            const minX = Math.min(...xs);
+            const maxX = Math.max(...xs);
+            hairChart.data.datasets[1].data = [
+                { x: minX, y: slope * minX + intercept },
+                { x: maxX, y: slope * maxX + intercept }
+            ];
+        }
+    } else {
+        hairChart.data.datasets[1].data = [];
+    }
+    
+    hairChart.update();
+}
+
 // Wavelength to RGB
 const WAVE_COLORS = {
     405: { r: 138, g: 43, b: 226, glow: "rgba(138, 43, 226, 0.4)" },
@@ -570,6 +667,7 @@ function renderTable() {
             tbody.appendChild(tr);
         });
     }
+    updateChart();
 }
 
 document.getElementById('clear-data').addEventListener('click', () => {
@@ -683,6 +781,21 @@ document.getElementById('download-pdf').addEventListener('click', () => {
 
     doc.setTextColor(30, 80, 160);
     doc.text(`[Computed] Average Calculated Thickness = ${avg_a_um.toFixed(2)} µm`, 20, y + 36);
+
+    // ── Embed the chart image ──
+    try {
+        const chartCanvas = document.getElementById('hairChart');
+        const chartImg = chartCanvas.toDataURL('image/png');
+        const currentY = y + 46;
+        const pageH = doc.internal.pageSize.getHeight();
+        if (currentY + 60 > pageH) doc.addPage();
+        doc.addPage();
+        doc.setFont('helvetica', 'bold').setFontSize(11).setTextColor(0);
+        doc.text('Graph: Fringe Width (β) vs Screen Distance (D)', PW / 2, 20, { align: 'center' });
+        doc.addImage(chartImg, 'PNG', 15, 28, PW - 30, 100);
+        doc.setFont('helvetica', 'normal').setFontSize(9).setTextColor(100);
+        doc.text('Red dots = recorded readings. Dashed line = linear fit.', PW / 2, 135, { align: 'center' });
+    } catch (e) { /* chart embed optional */ }
 
     doc.save("Hair_Thickness_Report.pdf");
 });

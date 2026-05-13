@@ -23,6 +23,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="../../css/vlabs-theme.css">
 
     <style>
@@ -81,73 +82,82 @@
             <p class="text-muted small">Engineering Physics Simulation Workspace</p>
         </div>
 
-        <div class="row g-4">
+        <!-- ROW 1 — FULL-WIDTH SIMULATION -->
+        <div class="card shadow-sm border-0 p-3 mb-4" id="circuit-card">
+            <h5 class="text-center mb-3 border-bottom pb-2">Experimental Setup: Wave Packet Simulation</h5>
 
-            <div class="col-lg-6">
-                <div class="card p-3 h-100">
+            <!-- Canvas -->
+            <div class="chart-container mb-3 border rounded p-2" style="background: #1e1e1e; height: 280px; position: relative;">
+                <canvas id="waveChart"></canvas>
+            </div>
 
-                    <div class="slider-container mb-2">
+            <!-- Controls -->
+            <div class="p-3 bg-light rounded border">
+                <div class="row align-items-end g-3">
+                    <div class="col-md-6">
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <label class="fw-bold text-primary mb-0 small">Position Uncertainty (Δx)</label>
                             <span class="badge bg-primary px-2 py-1"><span id="x-meter">10.0</span> pm</span>
                         </div>
-                        <div class="d-flex align-items-center gap-2">
-    <button type="button" class="btn btn-sm btn-outline-secondary border-0" onclick="document.getElementById('x-slider').stepDown(); document.getElementById('x-slider').dispatchEvent(new Event('input'))">&#9664;</button>
-    <input type="range" id="x-slider" class="form-range" min="1" max="100" step="1" value="10">
-    <button type="button" class="btn btn-sm btn-outline-secondary border-0" onclick="document.getElementById('x-slider').stepUp(); document.getElementById('x-slider').dispatchEvent(new Event('input'))">&#9654;</button>
-</div>
+                        <div class="d-flex align-items-center gap-3">
+                            <button type="button" class="btn-slider-ctrl" onclick="document.getElementById('x-slider').stepDown(); document.getElementById('x-slider').dispatchEvent(new Event('input'))">&#9664;</button>
+                            <input type="range" id="x-slider" class="custom-dark-slider w-100" min="1" max="100" step="1" value="10">
+                            <button type="button" class="btn-slider-ctrl" onclick="document.getElementById('x-slider').stepUp(); document.getElementById('x-slider').dispatchEvent(new Event('input'))">&#9654;</button>
+                        </div>
                     </div>
 
-                    <div class="slider-container mb-3">
+                    <div class="col-md-6">
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <label class="fw-bold text-danger mb-0 small">Momentum Uncertainty (Δp)</label>
                             <span class="badge bg-danger px-2 py-1"><span id="p-meter">2.0</span></span>
                         </div>
-                        <div class="d-flex align-items-center gap-2">
-    <button type="button" class="btn btn-sm btn-outline-secondary border-0" onclick="document.getElementById('p-slider').stepDown(); document.getElementById('p-slider').dispatchEvent(new Event('input'))">&#9664;</button>
-    <input type="range" id="p-slider" class="form-range" min="0.1" max="15" step="0.1" value="2.0">
-    <button type="button" class="btn btn-sm btn-outline-secondary border-0" onclick="document.getElementById('p-slider').stepUp(); document.getElementById('p-slider').dispatchEvent(new Event('input'))">&#9654;</button>
-</div>
-                        <div class="text-muted" style="font-size: 0.75rem; text-align: right;">Scale: $\times 10^{-24}$
-                            kg·m/s</div>
-                    </div>
-
-                    <div class="alert bg-light border text-center py-2 mb-3">
-                        <div class="fs-5 fw-bold math-text" id="product-display">
-                            Product: <span id="product-val">2.00 &times; 10<sup>-35</sup></span> J·s
+                        <div class="d-flex align-items-center gap-3">
+                            <button type="button" class="btn-slider-ctrl" onclick="document.getElementById('p-slider').stepDown(); document.getElementById('p-slider').dispatchEvent(new Event('input'))">&#9664;</button>
+                            <input type="range" id="p-slider" class="custom-dark-slider w-100" min="0.1" max="15" step="0.1" value="2.0">
+                            <button type="button" class="btn-slider-ctrl" onclick="document.getElementById('p-slider').stepUp(); document.getElementById('p-slider').dispatchEvent(new Event('input'))">&#9654;</button>
                         </div>
-                        <div id="warning-text" class="text-danger small fw-bold mt-1" style="display: none;">
-                            ⚠️ Below theoretical minimum limit ($5.27 \times 10^{-35}$ J·s)!
-                        </div>
+                        <div class="text-muted" style="font-size: 0.75rem; text-align: right;">Scale: $\times 10^{-24}$ kg·m/s</div>
                     </div>
+                </div>
 
-                    <div class="chart-container mt-auto border rounded p-2">
-                        <canvas id="waveChart"></canvas>
+                <div class="alert bg-light border text-center py-2 mb-0 mt-3">
+                    <div class="fs-5 fw-bold math-text" id="product-display">
+                        Product: <span id="product-val">2.00 &times; 10<sup>-35</sup></span> J·s
+                    </div>
+                    <div id="warning-text" class="text-danger small fw-bold mt-1" style="display: none;">
+                        ⚠️ Below theoretical minimum limit ($5.27 \times 10^{-35}$ J·s)!
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="col-lg-6">
-                <div class="card shadow-sm h-100 graph-card">
-                    <div class="card-header text-center border-bottom-0 pt-3 bg-transparent" style="border-bottom: 1px solid #dee2e6 !important;">
-                        <span class="fw-bold text-white" style="font-size:0.95rem;">Observation Table</span>
+        <!-- ROW 2 — OBSERVATIONS + GRAPH -->
+        <div class="row g-4 align-items-start mb-4">
+            
+            <!-- Observation table -->
+            <div class="col-lg-5">
+                <div class="card shadow-sm border-0 p-3 d-flex flex-column">
+                    <h5 class="fw-bold mb-3 text-center border-bottom pb-2">Observations</h5>
+
+                    <div class="obs-table-container">
+                        <table id="obs-table" class="table text-center mb-0">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Δx (m)</th>
+                                    <th>Δp (kg·m/s)</th>
+                                    <th>Δx · Δp (J·s)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="obs-body"></tbody>
+                        </table>
                     </div>
-                    <div class="card-body p-0 bg-white">
-                        <div class="table-responsive mb-2" style="max-height: 180px; overflow-y: auto;">
-                            <table class="table table-hover table-sm text-center align-middle mb-0" style="font-size: 0.75rem;">
-                                <thead class="table-dark text-white" style="position: sticky; top: 0; z-index: 1;">
-                                    <tr>
-                                        <th class="py-1">#</th>
-                                        <th class="py-1">Δx (m)</th>
-                                        <th class="py-1">Δp (kg·m/s)</th>
-                                        <th class="py-1">Δx · Δp (J·s)</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="obs-body" class="math-text"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="card-footer border-top-0 pb-3 text-center bg-transparent mt-auto">
+
+                    <p id="empty-hint" class="text-center text-muted small mt-3 mb-0">
+                        No readings recorded yet. Adjust sliders and click <strong>Record Reading</strong>.
+                    </p>
+
+                    <div class="card-footer border-top-0 pb-1 pt-3 text-center bg-transparent mt-auto">
                         <button id="add-reading" class="btn btn-primary btn-sm px-4 fw-bold shadow-sm">
                             Record Reading
                         </button>
@@ -155,6 +165,18 @@
                 </div>
             </div>
 
+            <!-- Graph: 1/Δx vs Δp -->
+            <div class="col-lg-7">
+                <div class="card shadow-sm border-0 p-3 h-100">
+                    <h5 class="fw-bold mb-3 text-center border-bottom pb-2">Graph: Momentum (Δp) vs Inverse Position (1/Δx)</h5>
+                    <div style="position: relative; height: 285px;">
+                        <canvas id="uncertaintyChart"></canvas>
+                    </div>
+                    <p class="text-muted small text-center mt-2 mb-0">
+                        A straight line indicates inverse proportionality. Slope represents the uncertainty product $\ge \hbar/2$.
+                    </p>
+                </div>
+            </div>
         </div>
 
         <div class="row g-4 mt-2">
