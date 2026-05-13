@@ -10,7 +10,8 @@ const materialSelect = document.getElementById("material-select");
 const voltSlider = document.getElementById("volt-slider");
 const voltBadge = document.getElementById("volt-badge");
 
-// Fine tune buttons removed
+const btnFineUp = document.getElementById("fine-tune-up");
+const btnFineDown = document.getElementById("fine-tune-down");
 const addReadingBtn = document.getElementById("add-reading");
 const obsBody = document.getElementById("obs-body");
 const graphCanvas = document.getElementById("graphCanvas");
@@ -75,7 +76,21 @@ function init() {
     materialSelect.addEventListener("change", updateParams);
     voltSlider.addEventListener("input", updateParams);
 
-    // Fine-tune event listeners removed
+    btnFineUp.addEventListener("click", () => {
+        let v = parseFloat(voltSlider.value);
+        if (v < 0) {
+            voltSlider.value = (v + 0.01).toFixed(2);
+            updateParams();
+        }
+    });
+
+    btnFineDown.addEventListener("click", () => {
+        let v = parseFloat(voltSlider.value);
+        if (v > -10) {
+            voltSlider.value = (v - 0.01).toFixed(2);
+            updateParams();
+        }
+    });
 
     updateParams();
     renderLoop();
