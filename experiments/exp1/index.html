@@ -221,7 +221,11 @@
                                     <label>Applied Potential (V)</label>
                                     <span class="badge badge-dark-custom" id="volt-badge">0.00 V</span>
                                 </div>
-                                <input type="range" id="volt-slider" class="form-range" min="-5.00" max="0.00" step="0.01" value="0.00">
+                                <div class="d-flex align-items-center gap-2">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary px-2 py-0 border-secondary text-secondary" id="fine-tune-down">&#9664;</button>
+                                    <input type="range" id="volt-slider" class="form-range" min="-5.00" max="0.00" step="0.01" value="0.00">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary px-2 py-0 border-secondary text-secondary" id="fine-tune-up">&#9654;</button>
+                                </div>
                             </div>
                         </div>
                     </div>
