@@ -308,42 +308,7 @@ function calculateHallEffect() {
 currentSlider.addEventListener('input', updateSimulation);
 magneticSlider.addEventListener('input', updateSimulation);
 
-// Logic for Increment and Decrement Buttons
-document.getElementById('current-decrease').addEventListener('click', () => {
-    let currentValue = parseFloat(currentSlider.value);
-    const stepValue = parseFloat(currentSlider.step);
-    if (currentValue > parseFloat(currentSlider.min)) {
-        currentSlider.value = (currentValue - stepValue).toFixed(1);
-        updateSimulation();
-    }
-});
-
-document.getElementById('current-increase').addEventListener('click', () => {
-    let currentValue = parseFloat(currentSlider.value);
-    const stepValue = parseFloat(currentSlider.step);
-    if (currentValue < parseFloat(currentSlider.max)) {
-        currentSlider.value = (currentValue + stepValue).toFixed(1);
-        updateSimulation();
-    }
-});
-
-document.getElementById('magnetic-decrease').addEventListener('click', () => {
-    let currentValue = parseFloat(magneticSlider.value);
-    const stepValue = parseFloat(magneticSlider.step);
-    if (currentValue > parseFloat(magneticSlider.min)) {
-        magneticSlider.value = (currentValue - stepValue).toFixed(2);
-        updateSimulation();
-    }
-});
-
-document.getElementById('magnetic-increase').addEventListener('click', () => {
-    let currentValue = parseFloat(magneticSlider.value);
-    const stepValue = parseFloat(magneticSlider.step);
-    if (currentValue < parseFloat(magneticSlider.max)) {
-        magneticSlider.value = (currentValue + stepValue).toFixed(2);
-        updateSimulation();
-    }
-});
+// Logic for Increment and Decrement Buttons is handled inline in HTML
 
 // User Interface Action Buttons
 addBtn.addEventListener('click', addRow);
@@ -371,7 +336,7 @@ document.getElementById('download-pdf').addEventListener('click', async function
     documentInstance.text("Date of Experiment: ____________________", 20, 45);
 
     documentInstance.setFont("helvetica", "bold").text("1. Experimental Setup Schematic:", 20, 60);
-    const circuitArea = document.querySelector('.circuit-container');
+    const circuitArea = document.querySelector('.sim-container');
     const circuitCanvas = await html2canvas(circuitArea, { scale: 2 });
     documentInstance.addImage(circuitCanvas.toDataURL('image/png'), 'PNG', 40, 65, 130, 55);
 
