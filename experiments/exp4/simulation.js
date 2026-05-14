@@ -559,7 +559,7 @@ document.getElementById("download-pdf").addEventListener("click", async function
     const PW = doc.internal.pageSize.getWidth();
 
     doc.setFont('helvetica', 'bold').setFontSize(18);
-    doc.text('PICT Physics Virtual Lab', PW / 2, 15, { align: 'center' });
+    doc.text('PICT Quantum Physics Virtual Lab', PW / 2, 15, { align: 'center' });
     doc.setFontSize(12).setFont('helvetica', 'normal');
     doc.text('Laser Beam Divergence \u2013 Lab Report', PW / 2, 22, { align: 'center' });
     doc.line(20, 25, PW - 20, 25);
