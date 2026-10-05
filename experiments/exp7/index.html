@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exp 7: Diffraction Grating | Virtual Lab</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+    <script>
+        window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="stylesheet" href="../../css/vlabs-theme.css">
+
+    <style>
+        /* ── Base ─────────────────────────────────────────── */
+        body {
+            background-color: #f5f5f5;
+        }
+
+        /* ── Two-column experiment workspace ─────────────── */
+        /*
+         * .exp-workspace   — outer flex row, capped at ~70 vh
+         * .sim-col         — left: canvas + pattern strip  (~68 %)
+         * .ctrl-col        — right: all controls            (~32 %)
+         */
+        .exp-workspace {
+            display: flex;
+            flex-direction: row;
+            gap: 0;
+            height: 70vh;
+            min-height: 480px;
+            max-height: 820px;
+            background: #0d0d0d;
+            border-radius: 12px;
+            border: 1px solid #333333;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+            margin-bottom: 1rem;
+        }
+
+        /* ── Left column — simulation ───────────────────── */
+        .sim-col {
+            display: flex;
+            flex-direction: column;
+            flex: 0 0 67%;
+            min-width: 0;
+            border-right: 1px solid #333333;
+            background: #0d0d0d;
+            overflow: hidden;
+        }
+
+        /* Canvas fills available vertical space in the left column */
+        .main-canvas-wrap {
+            position: relative;
+            flex: 1 1 auto;
+            background: #0d0d0d;
+            overflow: hidden;
+        }
+
+        #dgCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            /* stretch to fill the flex box */
+            object-fit: contain;
+        }
+
+        /* Status overlay */
+        .experiment-status {
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            z-index: 10;
+            background: rgba(20, 20, 20, 0.78);
+            border: 1px solid #444444;
+            color: #eeeeee;
+            font-weight: 600;
+            padding: 5px 12px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(4px);
+            font-size: 0.8rem;
+        }
+
+        .status-led {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: #cccccc;
+            box-shadow: 0 0 6px #cccccc;
+            flex-shrink: 0;
+        }
+
+        .status-led.aligned {
+            background: #00ff88;
+            box-shadow: 0 0 8px #00ff88;
+        }
+
+        /* Diffraction pattern strip — fixed height at bottom of sim-col */
+        .pattern-wrap {
+            flex: 0 0 auto;
+            background: #111111;
+            border-top: 1px solid #333333;
+            padding: 8px 14px 6px;
+        }
+
+        .pattern-wrap h6 {
+            color: #777;
+            font-size: 0.72rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        #patternCanvas {
+            display: block;
+            width: 100%;
+            height: 60px;
+            border-radius: 4px;
+        }
+
+        /* ── Right column — controls ────────────────────── */
+        .ctrl-col {
+            flex: 0 0 33%;
+            min-width: 260px;
+            display: flex;
+            flex-direction: column;
+            background: #1a1a1a;
+            overflow: hidden;
+        }
+
+        /* Scrollable interior of the control column */
+        .ctrl-scroll {
+            flex: 1 1 auto;
+            overflow-y: auto;
+            padding: 14px 14px 10px;
+            scrollbar-width: thin;
+            scrollbar-color: #444 #1a1a1a;
+        }
+
+        .ctrl-scroll::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .ctrl-scroll::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+
+        .ctrl-scroll::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 3px;
+        }
+
+        /* Add-reading button pinned at the bottom of ctrl-col */
+        .ctrl-footer {
+            flex: 0 0 auto;
+            padding: 10px 14px;
+            border-top: 1px solid #2a2a2a;
+            background: #161616;
+        }
+
+        /* ── Controls card (each section inside right panel) */
+        .ctrl-card {
+            background: #222222;
+            border: 1px solid #2e2e2e;
+            border-radius: 8px;
+            padding: 12px 14px;
+            color: #dddddd;
+            margin-bottom: 10px;
+        }
+
+        .ctrl-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .ctrl-card h6 {
+            color: #cccccc !important;
+            font-size: 0.78rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #333;
+        }
+
+        .ctrl-card label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #999;
+        }
+
+        /* Badge that shows current control value */
+        .badge-dark-custom {
+            background: #111111;
+            border: 1px solid #444444;
+            color: #eeeeee;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+
+        /* Select inside dark panel */
+        .ctrl-col select.form-select,
+        .ctrl-col .form-select {
+            background-color: #1a1a1a !important;
+            color: #eeeeee !important;
+            border-color: #444444 !important;
+            font-size: 0.83rem;
+        }
+
+        .ctrl-col option {
+            background-color: #1a1a1a;
+        }
+
+        /* Alignment status */
+        #align-status {
+            font-size: 0.76rem;
+            font-family: 'Courier New', monospace;
+            padding: 5px 10px;
+            border-radius: 4px;
+            border: 1px solid #555555;
+            background: #1a1a1a;
+            color: #aaaaaa;
+            margin-top: 8px;
+            line-height: 1.35;
+        }
+
+        #align-status.aligned {
+            border-color: #2a6a4a;
+            background: #0a2018;
+            color: #88ffbb;
+        }
+
+        /* White-light toggle */
+        .light-mode-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        /* Custom grey slider (unchanged from original) */
+        input[type=range].custom-grey-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+
+        input[type=range].custom-grey-slider:focus {
+            outline: none;
+        }
+
+        input[type=range].custom-grey-slider::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 2px;
+            cursor: pointer;
+            background: #999999;
+            border-radius: 1px;
+        }
+
+        input[type=range].custom-grey-slider::-webkit-slider-thumb {
+            height: 13px;
+            width: 13px;
+            border-radius: 50%;
+            background: #cccccc;
+            cursor: pointer;
+            -webkit-appearance: none;
+            appearance: none;
+            margin-top: -5.5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+            transition: transform 0.15s ease, background 0.15s ease;
+        }
+
+        input[type=range].custom-grey-slider::-webkit-slider-thumb:hover,
+        input[type=range].custom-grey-slider:focus::-webkit-slider-thumb {
+            transform: scale(1.2);
+            background: #ffffff;
+        }
+
+        input[type=range].custom-grey-slider::-moz-range-track {
+            width: 100%;
+            height: 2px;
+            cursor: pointer;
+            background: #999999;
+            border-radius: 1px;
+        }
+
+        input[type=range].custom-grey-slider::-moz-range-thumb {
+            height: 13px;
+            width: 13px;
+            border-radius: 50%;
+            background: #cccccc;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+            transition: transform 0.15s ease, background 0.15s ease;
+        }
+
+        input[type=range].custom-grey-slider::-moz-range-thumb:hover,
+        input[type=range].custom-grey-slider:focus::-moz-range-thumb {
+            transform: scale(1.2);
+            background: #ffffff;
+        }
+
+        /* ── Instruction bar ────────────────────────────── */
+        .instruction-bar {
+            background: #1e1e1e;
+            color: #999;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 0.84rem;
+            border: 1px solid #2e2e2e;
+            margin-bottom: 1.25rem;
+        }
+
+        /* ── Graph / table cards below workspace ─────────── */
+        .graph-card {
+            background-color: #111111 !important;
+            border: 1px solid #333333 !important;
+        }
+
+        /* ── Responsive: stack on small screens ──────────── */
+        @media (max-width: 860px) {
+            .exp-workspace {
+                flex-direction: column;
+                height: auto;
+                max-height: none;
+            }
+
+            .sim-col {
+                flex: none;
+                width: 100%;
+                height: 45vw;
+                min-height: 260px;
+                max-height: 420px;
+                border-right: none;
+                border-bottom: 1px solid #333333;
+            }
+
+            .ctrl-col {
+                flex: none;
+                width: 100%;
+                min-width: 0;
+                max-height: 380px;
+            }
+
+            #patternCanvas {
+                height: 50px;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-dark bg-dark shadow-sm mb-3">
+        <div class="container-fluid px-4">
+            <span class="navbar-brand mb-0 h1 fw-bold">PICT Physics Virtual Lab</span>
+            <a href="../../index.html" class="btn btn-outline-light btn-sm fw-bold">Home Page</a>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-4 mb-5">
+
+        <!-- PAGE TITLE -->
+        <div class="text-center mb-3">
+            <h3 class="fw-bold text-dark mb-0">Determination of Wavelength of Light Using Diffraction Grating</h3>
+            <p class="text-muted small mb-0">Diffraction Grating Experiment</p>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════
+             TWO-COLUMN EXPERIMENT WORKSPACE
+             Left  (67%) : canvas simulation + pattern strip
+             Right (33%) : all controls, scrollable
+             ═══════════════════════════════════════════════════ -->
+        <div class="exp-workspace">
+
+            <!-- ── LEFT: Simulation ────────────────────────── -->
+            <div class="sim-col">
+
+                <!-- Main apparatus canvas -->
+                <div class="main-canvas-wrap">
+                    <div class="experiment-status">
+                        <div class="status-led" id="status-led"></div>
+                        <span id="experiment-mode-label">Experiment Running</span>
+                    </div>
+                    <canvas id="dgCanvas" width="1200" height="420"></canvas>
+                </div>
+
+                <!-- Diffraction pattern strip -->
+                <div class="pattern-wrap">
+                    <h6>Diffraction Pattern — Screen View</h6>
+                    <canvas id="patternCanvas" width="1200" height="90"></canvas>
+                </div>
+
+            </div><!-- /sim-col -->
+
+            <!-- ── RIGHT: Controls ─────────────────────────── -->
+            <div class="ctrl-col">
+
+                <!-- Scrollable control area -->
+                <div class="ctrl-scroll">
+
+                    <!-- Light Source -->
+                    <div class="ctrl-card">
+                        <h6>Light Source</h6>
+
+                        <!-- White-light toggle -->
+                        <div class="light-mode-toggle">
+                            <div class="form-check form-switch mb-0">
+                                <input class="form-check-input" type="checkbox"
+                                    id="white-light-toggle" role="switch">
+                                <label class="form-check-label" for="white-light-toggle"
+                                    style="font-size:0.8rem; color:#aaa;">White Light Mode</label>
+                            </div>
+                        </div>
+
+                        <div id="wavelength-controls">
+                            <!-- Wavelength slider -->
+                            <div class="d-flex justify-content-between mb-1">
+                                <label>Wavelength &lambda;</label>
+                                <span class="badge badge-dark-custom" id="wave-badge">589 nm</span>
+                            </div>
+                            <input type="range" id="wave-slider" class="custom-grey-slider w-100"
+                                min="400" max="700" step="1" value="589">
+                            <div class="d-flex justify-content-between mt-1 mb-2">
+                                <small class="text-muted" style="font-size:0.72rem;">400 nm</small>
+                                <small class="text-muted" style="font-size:0.72rem;">700 nm</small>
+                            </div>
+
+                            <!-- Common source preset -->
+                            <label class="mb-1">Common Sources</label>
+                            <select id="source-select" class="form-select form-select-sm">
+                                <option value="450">Violet — 450 nm</option>
+                                <option value="500">Cyan — 500 nm</option>
+                                <option value="550">Green — 550 nm</option>
+                                <option value="589" selected>Sodium D — 589 nm</option>
+                                <option value="600">Orange — 600 nm</option>
+                                <option value="650">Red — 650 nm</option>
+                            </select>
+                        </div>
+                    </div><!-- /Light Source -->
+
+                    <!-- Diffraction Grating -->
+                    <div class="ctrl-card">
+                        <h6>Diffraction Grating</h6>
+
+                        <label class="mb-1">Grating Density N (lines/mm)</label>
+                        <select id="grating-select" class="form-select form-select-sm mb-2">
+                            <option value="300">300 lines/mm</option>
+                            <option value="600" selected>600 lines/mm</option>
+                            <option value="1200">1200 lines/mm</option>
+                            <option value="1500">1500 lines/mm</option>
+                        </select>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small style="color:#888; font-size:0.76rem;">d = 1/N</small>
+                            <span class="badge badge-dark-custom" id="d-badge">1.667 &times; 10&#x207B;&#x2076; m</span>
+                        </div>
+                    </div><!-- /Grating -->
+
+                    <!-- Diffraction Order -->
+                    <div class="ctrl-card">
+                        <h6>Diffraction Order</h6>
+
+                        <label class="mb-1">Order n</label>
+                        <select id="order-select" class="form-select form-select-sm mb-2">
+                            <option value="0">0 — Central Maximum</option>
+                            <option value="1" selected>1 — First Order</option>
+                            <option value="2">2 — Second Order</option>
+                            <option value="3">3 — Third Order</option>
+                        </select>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small style="color:#888; font-size:0.76rem;">Theoretical &theta;</small>
+                            <span class="badge badge-dark-custom" id="theta-theo-badge">&theta; = —</span>
+                        </div>
+                    </div><!-- /Order -->
+
+                    <!-- Telescope Angle -->
+                    <div class="ctrl-card" style="border-color:#444;">
+                        <h6>Telescope Angle</h6>
+
+                        <div class="d-flex justify-content-between mb-1">
+                            <label>Measured &theta;</label>
+                            <span class="badge badge-dark-custom" id="theta-meas-badge">0.00°</span>
+                        </div>
+
+                        <!-- Slider row with fine-tune buttons -->
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <button type="button"
+                                class="btn btn-sm btn-outline-secondary px-2 py-0 border-secondary text-secondary"
+                                id="theta-fine-down">&#9664;</button>
+                            <input type="range" id="theta-slider" class="custom-grey-slider w-100"
+                                min="0" max="90" step="0.05" value="0">
+                            <button type="button"
+                                class="btn btn-sm btn-outline-secondary px-2 py-0 border-secondary text-secondary"
+                                id="theta-fine-up">&#9654;</button>
+                        </div>
+
+                        <!-- Alignment indicator -->
+                        <div id="align-status">Adjust telescope to locate the principal maximum</div>
+                    </div><!-- /Telescope -->
+
+                </div><!-- /ctrl-scroll -->
+
+                <!-- Pinned Add Reading button at the bottom of the control panel -->
+                <div class="ctrl-footer">
+                    <button id="add-reading" class="btn btn-primary w-100 fw-bold btn-sm py-2">
+                        Add Reading
+                    </button>
+                </div>
+
+            </div><!-- /ctrl-col -->
+
+        </div><!-- /exp-workspace -->
+
+        <!-- ── Instruction bar (directly below workspace) ─── -->
+        <div class="instruction-bar">
+            Select a wavelength and diffraction grating density. Observe the diffraction maxima on
+            the screen. Adjust the telescope angle slider until the alignment indicator turns green
+            ($d \sin\theta = n\lambda$ satisfied). Record the measured angle and repeat for
+            different wavelengths to build an observation table.
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════
+             OBSERVATIONS & GRAPH  (unchanged structure below)
+             ═══════════════════════════════════════════════════ -->
+        <div class="row g-4 mb-4">
+
+            <!-- Graph -->
+            <div class="col-lg-6">
+                <div class="card shadow-sm h-100 graph-card">
+                    <div class="card-header text-center border-bottom-0 pt-3 bg-transparent">
+                        <span class="fw-bold text-white" style="font-size:0.95rem;">
+                            sin&theta; vs &lambda; Graph
+                            &nbsp;<small style="color:#888; font-size:0.8rem;">(slope = n/d)</small>
+                        </span>
+                    </div>
+                    <div class="card-body p-3 d-flex align-items-center justify-content-center bg-white">
+                        <canvas id="graphCanvas" width="500" height="350"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Observation table -->
+            <div class="col-lg-6">
+                <div class="card shadow-sm h-100 graph-card">
+                    <div class="card-header text-center border-bottom-0 pt-3 bg-transparent"
+                        style="border-bottom: 1px solid #dee2e6 !important;">
+                        <span class="fw-bold text-white" style="font-size:0.95rem;">Observation Table</span>
+                    </div>
+                    <div class="card-body p-0 bg-white">
+                        <div class="table-responsive" style="max-height: 270px; overflow-y: auto;">
+                            <table id="obs-table"
+                                class="table table-hover table-sm text-center align-middle mb-0"
+                                style="font-size: 0.73rem;">
+                                <thead class="table-dark" style="position: sticky; top: 0; z-index: 1;">
+                                    <tr>
+                                        <th class="py-1">Sl.<br>No.</th>
+                                        <th class="py-1">&lambda;<br>(nm)</th>
+                                        <th class="py-1">N<br>(l/mm)</th>
+                                        <th class="py-1">d (m)</th>
+                                        <th class="py-1">n</th>
+                                        <th class="py-1">Theo. &theta;<br>(°)</th>
+                                        <th class="py-1">Meas. &theta;<br>(°)</th>
+                                        <th class="py-1">Calc. &lambda;<br>(nm)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="obs-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- No footer Add Reading here; it is in the ctrl-footer above -->
+                </div>
+            </div>
+
+        </div><!-- /row -->
+
+        <!-- ACTIONS -->
+        <div class="row g-4 mt-2">
+            <div class="col-lg-12">
+                <div class="card shadow-sm border-0 p-3 text-center">
+                    <h6 class="fw-bold mb-3 border-bottom pb-2">Actions</h6>
+                    <div class="d-flex justify-content-center gap-2 flex-wrap">
+                        <button onclick="calculateResult()" class="btn btn-success fw-bold py-2 shadow-sm px-4">
+                            Calculate Result
+                        </button>
+                        <button id="clear-data" class="btn btn-outline-danger shadow-sm px-4">Clear Graph Data</button>
+                        <button id="download-pdf" class="btn btn-danger shadow-sm px-4">Download Report PDF</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RESULT OUTPUT -->
+        <div id="calculation-output" class="mt-4 pb-5"></div>
+
+    </div><!-- /container-fluid -->
+
+    <script src="simulation.js"></script>
+</body>
+
+</html>
