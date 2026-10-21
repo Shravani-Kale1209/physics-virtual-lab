@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exp 8: Newton's Rings | Virtual Lab</title>
+    <meta name="description"
+        content="Determine the wavelength of monochromatic light using Newton's Rings. Select ring number, read diameter, record observations.">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script>window.MathJax = { tex: { inlineMath: [['$', '$']] } };</script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="stylesheet" href="../../css/vlabs-theme.css">
+
+    <style>
+        body {
+            background: #f4f4f4;
+        }
+
+        /* ── Navbar ─────────────────────────────────────────── */
+        .top-bar {
+            background: #111;
+            padding: 10px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .top-bar .brand {
+            color: #fff;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .top-bar .home-btn {
+            color: #ccc;
+            border: 1px solid #555;
+            padding: 4px 14px;
+            border-radius: 4px;
+            font-size: 0.82rem;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .top-bar .home-btn:hover {
+            color: #fff;
+            border-color: #aaa;
+        }
+
+        /* ── Page title ─────────────────────────────────────── */
+        .page-title {
+            text-align: center;
+            padding: 18px 0 10px;
+        }
+
+        .page-title h1 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #111;
+            margin: 0 0 2px;
+        }
+
+        .page-title p {
+            color: #777;
+            font-size: 0.82rem;
+            margin: 0;
+        }
+
+        /* ── Step pills (quick-glance instructions) ──────────── */
+        .steps-row {
+            display: flex;
+            gap: 0;
+            background: #222;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 0 16px 14px;
+        }
+
+        .step-pill {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 14px;
+            color: #aaa;
+            font-size: 0.78rem;
+            border-right: 1px solid #333;
+        }
+
+        .step-pill:last-child {
+            border-right: none;
+        }
+
+        .step-num {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #333;
+            color: #888;
+            font-size: 0.7rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .step-pill.active .step-num {
+            background: #3a7bd5;
+            color: #fff;
+        }
+
+        .step-pill.active {
+            color: #ddd;
+        }
+
+        /* ── Main workspace ──────────────────────────────────── */
+        .workspace {
+            display: flex;
+            gap: 0;
+            margin: 0 16px 14px;
+            background: #0d0d0d;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #2a2a2a;
+            height: 66vh;
+            min-height: 440px;
+            max-height: 780px;
+        }
+
+        /* Canvas side */
+        .canvas-side {
+            flex: 1 1 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            border-right: 1px solid #2a2a2a;
+        }
+
+        #nrCanvas {
+            display: block;
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .canvas-label {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.28);
+            font-size: 0.7rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        /* Control side */
+        .ctrl-side {
+            width: 290px;
+            flex-shrink: 0;
+            background: #161616;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .ctrl-body {
+            flex: 1 1 auto;
+            overflow-y: auto;
+            padding: 16px 16px 8px;
+            scrollbar-width: thin;
+            scrollbar-color: #333 #161616;
+        }
+
+        .ctrl-body::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .ctrl-body::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 2px;
+        }
+
+        /* Section label inside ctrl */
+        .ctrl-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #555;
+            margin-bottom: 6px;
+            margin-top: 14px;
+        }
+
+        .ctrl-label:first-child {
+            margin-top: 0;
+        }
+
+        /* Slider row */
+        .slider-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .slider-val {
+            font-family: 'Courier New', monospace;
+            font-size: 0.78rem;
+            color: #ddd;
+            background: #0d0d0d;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 2px 7px;
+            white-space: nowrap;
+            min-width: 56px;
+            text-align: center;
+        }
+
+        /* Source preset select */
+        select.preset-sel {
+            width: 100%;
+            background: #111;
+            color: #ccc;
+            border: 1px solid #333;
+            border-radius: 5px;
+            font-size: 0.78rem;
+            padding: 5px 8px;
+            margin-bottom: 2px;
+            cursor: pointer;
+        }
+
+        select.preset-sel option {
+            background: #111;
+        }
+
+        /* Ring stepper */
+        .ring-stepper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+        }
+
+        .stepper-btn {
+            width: 30px;
+            height: 30px;
+            border: none;
+            background: #222;
+            border-radius: 5px;
+            color: #bbb;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .stepper-btn:hover {
+            background: #3a7bd5;
+            color: #fff;
+        }
+
+        .ring-display {
+            text-align: center;
+        }
+
+        .ring-display .ring-n {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1;
+            font-family: 'Courier New', monospace;
+        }
+
+        .ring-display .ring-lbl {
+            font-size: 0.62rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        /* Diameter display box */
+        .diam-box {
+            background: #0a1a0a;
+            border: 1px solid #2a5a2a;
+            border-radius: 8px;
+            padding: 12px 14px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .diam-box .diam-label {
+            font-size: 0.65rem;
+            color: #5a9a5a;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 3px;
+        }
+
+        .diam-box .diam-val {
+            font-size: 1.25rem;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            color: #66dd66;
+        }
+
+        .diam-box .diam-sub {
+            font-size: 0.68rem;
+            color: #4a7a4a;
+            margin-top: 2px;
+        }
+
+        /* Record button */
+        .ctrl-footer {
+            padding: 12px 16px;
+            border-top: 1px solid #1f1f1f;
+            background: #111;
+        }
+
+        .btn-record {
+            width: 100%;
+            background: #3a7bd5;
+            color: #fff;
+            border: none;
+            border-radius: 7px;
+            padding: 11px 0;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s;
+            letter-spacing: 0.02em;
+        }
+
+        .btn-record:hover {
+            background: #2a6bc5;
+            transform: translateY(-1px);
+        }
+
+        .btn-record:active {
+            transform: translateY(0);
+        }
+
+        /* Slider custom style */
+        input[type=range].sl {
+            -webkit-appearance: none;
+            appearance: none;
+            flex: 1;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        input[type=range].sl::-webkit-slider-runnable-track {
+            height: 2px;
+            background: #444;
+            border-radius: 1px;
+        }
+
+        input[type=range].sl::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: #aaa;
+            margin-top: -5.5px;
+            transition: background 0.15s, transform 0.12s;
+        }
+
+        input[type=range].sl::-webkit-slider-thumb:hover {
+            background: #fff;
+            transform: scale(1.25);
+        }
+
+        input[type=range].sl::-moz-range-track {
+            height: 2px;
+            background: #444;
+            border-radius: 1px;
+        }
+
+        input[type=range].sl::-moz-range-thumb {
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: #aaa;
+            border: none;
+            transition: background 0.15s;
+        }
+
+        /* ── Formula bar ─────────────────────────────────────── */
+        .formula-bar {
+            margin: 0 16px 14px;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 32px;
+            flex-wrap: wrap;
+        }
+
+        .formula-item {
+            text-align: center;
+            font-size: 0.82rem;
+            color: #444;
+        }
+
+        .formula-item strong {
+            color: #111;
+            font-size: 0.9rem;
+        }
+
+        /* ── Observations section ────────────────────────────── */
+        .obs-section {
+            margin: 0 16px 14px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .obs-card {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .obs-card-header {
+            background: #111;
+            color: #fff;
+            padding: 8px 16px;
+            font-size: 0.82rem;
+            font-weight: 700;
+        }
+
+        .obs-table-wrap {
+            overflow-x: auto;
+        }
+
+        table.obs-tbl {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.78rem;
+        }
+
+        table.obs-tbl thead tr {
+            background: #f5f5f5;
+        }
+
+        table.obs-tbl th {
+            padding: 6px 10px;
+            text-align: center;
+            color: #555;
+            font-weight: 600;
+            border-bottom: 1px solid #e0e0e0;
+            white-space: nowrap;
+        }
+
+        table.obs-tbl td {
+            padding: 6px 10px;
+            text-align: center;
+            color: #222;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        table.obs-tbl tr:last-child td {
+            border-bottom: none;
+        }
+
+        table.obs-tbl tr:hover td {
+            background: #f9f9f9;
+        }
+
+        .btn-del {
+            background: none;
+            border: none;
+            color: #ccc;
+            font-size: 0.85rem;
+            cursor: pointer;
+            padding: 0 4px;
+            transition: color 0.15s;
+        }
+
+        .btn-del:hover {
+            color: #e55;
+        }
+
+        .empty-hint {
+            padding: 24px;
+            text-align: center;
+            color: #bbb;
+            font-size: 0.8rem;
+        }
+
+        /* Graph canvas */
+        #graphCanvas {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* ── Actions bar ─────────────────────────────────────── */
+        .actions-bar {
+            margin: 0 16px 14px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            padding: 9px 22px;
+            border-radius: 6px;
+            font-size: 0.84rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.15s;
+        }
+
+        .btn-calc {
+            background: #27a65c;
+            color: #fff;
+        }
+
+        .btn-calc:hover {
+            background: #1e9050;
+        }
+
+        .btn-clear {
+            background: transparent;
+            color: #888;
+            border: 1px solid #ccc;
+        }
+
+        .btn-clear:hover {
+            border-color: #e55;
+            color: #e55;
+        }
+
+        .btn-pdf {
+            background: #cc2222;
+            color: #fff;
+        }
+
+        .btn-pdf:hover {
+            background: #aa1818;
+        }
+
+        /* ── Result card ─────────────────────────────────────── */
+        #result-out {
+            margin: 0 16px 32px;
+        }
+
+        /* ── Responsive ──────────────────────────────────────── */
+        @media (max-width: 860px) {
+            .workspace {
+                flex-direction: column;
+                height: auto;
+                max-height: none;
+            }
+
+            .canvas-side {
+                height: 50vw;
+                min-height: 240px;
+                border-right: none;
+                border-bottom: 1px solid #2a2a2a;
+            }
+
+            .ctrl-side {
+                width: 100%;
+            }
+
+            .obs-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 540px) {
+            .steps-row {
+                display: none;
+            }
+
+            .formula-bar {
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-dark bg-dark shadow-sm mb-3">
+        <div class="container-fluid px-4">
+            <span class="navbar-brand mb-0 h1 fw-bold">PICT Physics Virtual Lab</span>
+            <a href="../../index.html" class="btn btn-outline-light btn-sm fw-bold">Home Page</a>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-4 mb-5">
+        <!-- PAGE TITLE -->
+        <div class="page-title">
+            <h1>Newton's Rings</h1>
+            <p>Determine the wavelength of monochromatic light from interference ring diameters</p>
+        </div>
+
+        <!-- STEP GUIDE -->
+        <div class="steps-row">
+            <div class="step-pill active">
+                <div class="step-num">1</div>
+                <span>Set wavelength &amp; lens parameters</span>
+            </div>
+            <div class="step-pill active">
+                <div class="step-num">2</div>
+                <span>Select ring number with ◀ ▶</span>
+            </div>
+            <div class="step-pill active">
+                <div class="step-num">3</div>
+                <span>Click <strong>Record Reading</strong> for each ring</span>
+            </div>
+            <div class="step-pill active">
+                <div class="step-num">4</div>
+                <span>Record 5+ rings, then <strong>Calculate Result</strong></span>
+            </div>
+        </div>
+
+        <!-- WORKSPACE -->
+        <div class="workspace">
+
+            <!-- Canvas -->
+            <div class="canvas-side">
+                <canvas id="nrCanvas" width="640" height="640"></canvas>
+                <div class="canvas-label">Newton's Rings Pattern</div>
+            </div>
+
+            <!-- Controls -->
+            <div class="ctrl-side">
+                <div class="ctrl-body">
+
+                    <!-- λ -->
+                    <div class="ctrl-label">Wavelength λ</div>
+                    <div class="slider-row">
+                        <input type="range" class="sl" id="wave-slider" min="400" max="700" step="1" value="589">
+                        <span class="slider-val" id="wave-val">589 nm</span>
+                    </div>
+                    <select class="preset-sel" id="source-sel">
+                        <option value="405">Violet — 405 nm</option>
+                        <option value="436">Mercury Violet — 436 nm</option>
+                        <option value="546">Mercury Green — 546 nm</option>
+                        <option value="589" selected>Sodium D — 589 nm</option>
+                        <option value="633">Helium–Neon — 633 nm</option>
+                        <option value="650">Red — 650 nm</option>
+                    </select>
+
+                    <!-- R -->
+                    <div class="ctrl-label">Radius of Curvature R</div>
+                    <div class="slider-row">
+                        <input type="range" class="sl" id="r-slider" min="0.50" max="3.00" step="0.05" value="1.00">
+                        <span class="slider-val" id="r-val">1.00 m</span>
+                    </div>
+
+                    <!-- Ring selector -->
+                    <div class="ctrl-label">Select Dark Ring</div>
+                    <div class="ring-stepper">
+                        <button class="stepper-btn" id="ring-prev" title="Previous ring">&#9664;</button>
+                        <div class="ring-display">
+                            <div class="ring-n" id="ring-n-display">5</div>
+                            <div class="ring-lbl">ring number n</div>
+                        </div>
+                        <button class="stepper-btn" id="ring-next" title="Next ring">&#9654;</button>
+                    </div>
+
+                    <!-- Diameter display -->
+                    <div class="diam-box">
+                        <div class="diam-label">Diameter of Ring <span id="diam-ring-label">5</span></div>
+                        <div class="diam-val" id="diam-val">—</div>
+                        <div class="diam-sub">$D_n = 2\sqrt{nR\lambda}$</div>
+                    </div>
+
+                </div>
+
+                <!-- Record button -->
+                <div class="ctrl-footer">
+                    <button class="btn-record" id="btn-record">+ Record Reading</button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- FORMULA BAR -->
+        <div class="formula-bar">
+            <div class="formula-item">
+                <strong>$D_n^2 = 4nR\lambda$</strong><br>
+                <span>dark ring condition</span>
+            </div>
+            <div class="formula-item">
+                <strong>slope = $4R\lambda$</strong><br>
+                <span>from D² vs n graph</span>
+            </div>
+            <div class="formula-item">
+                <strong>$\lambda = \dfrac{\text{slope}}{4R}$</strong><br>
+                <span>derived wavelength</span>
+            </div>
+        </div>
+
+        <!-- OBSERVATIONS -->
+        <div class="obs-section">
+
+            <!-- Table -->
+            <div class="obs-card">
+                <div class="obs-card-header">Observation Table</div>
+                <div class="obs-table-wrap">
+                    <table class="obs-tbl" id="obs-tbl">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>n</th>
+                                <th>D<sub>n</sub> (mm)</th>
+                                <th>D<sub>n</sub>² (mm²)</th>
+                                <th>Calc. λ (nm)</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="obs-body">
+                            <tr>
+                                <td colspan="6" class="empty-hint">No readings yet — record at least 5 rings.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Graph -->
+            <div class="obs-card">
+                <div class="obs-card-header">D<sub>n</sub>² vs n &nbsp;<span
+                        style="font-weight:400;color:#888;font-size:0.75rem;">(slope = 4Rλ)</span></div>
+                <canvas id="graphCanvas" width="500" height="320"></canvas>
+            </div>
+
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="actions-bar">
+            <button class="btn-action btn-calc" onclick="calculateResult()">Calculate Result</button>
+            <button class="btn-action btn-clear" id="btn-clear">Clear Data</button>
+            <button class="btn-action btn-pdf" id="btn-pdf">Download PDF</button>
+        </div>
+
+        <!-- RESULT -->
+        <div id="result-out"></div>
+
+        <script src="simulation.js"></script>
+</body>
+
+</html>
